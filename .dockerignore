@@ -1,0 +1,6 @@
+# The Dockerfiles run a locked `npm ci` inside the container; a host checkout's
+# node_modules (potentially stale or platform-specific) must never be copied
+# over it by `COPY . .`.
+node_modules
+**/node_modules
+.git
