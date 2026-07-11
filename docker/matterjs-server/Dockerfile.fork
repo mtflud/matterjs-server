@@ -37,8 +37,10 @@ RUN npm ci --ignore-scripts
 
 COPY . .
 
-# Apply the @matter/node keepalive-liveness patch, compile native modules, build,
-# then drop development dependencies from node_modules for the runtime copy.
+# Apply any node_modules patches (none currently — the keepalive-liveness patch landed
+# upstream in matter.js 0.17.5-alpha.0-20260711; the step stays for future patches),
+# compile native modules, build, then drop development dependencies from node_modules
+# for the runtime copy.
 RUN npx patch-package --error-on-fail \
     && npm rebuild --foreground-scripts \
     && npm run build \

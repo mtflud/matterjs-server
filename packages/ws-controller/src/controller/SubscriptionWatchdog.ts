@@ -69,8 +69,8 @@ export class SubscriptionWatchdog extends NodeProcessor {
 
     /**
      * Call from the node's connectionAlive observer — every data report or keepalive.
-     * NOTE: empty keepalives only reach connectionAlive with the @matter/node
-     * keepalive-liveness patch applied (see patches/); without it this signal is
+     * NOTE: empty keepalives only reach connectionAlive on @matter/node >=
+     * 0.17.5-alpha.0-20260711 (matter.js#4057); on older versions this signal is
      * data-reports-only and healthy quiet devices false-trip at threshold.
      */
     recordAlive(peer: PeerAddress): void {
