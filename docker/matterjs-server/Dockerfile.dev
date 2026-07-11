@@ -55,9 +55,12 @@ RUN npm ci --ignore-scripts
 # Copy source code
 COPY . .
 
-# Compile optional native modules (noble/bleno for BLE) now that the toolchain and
-# source are present, then build all packages.
-RUN npm rebuild --foreground-scripts \
+# Apply node_modules patches (the patches/ dir only arrives with COPY above; npm ci
+# ran --ignore-scripts so the postinstall hook did not fire), compile optional native
+# modules (noble/bleno for BLE) now that the toolchain and source are present, then
+# build all packages.
+RUN npx patch-package --error-on-fail \
+    && npm rebuild --foreground-scripts \
     && npm run build
 
 # Initialize data volume with user permissions

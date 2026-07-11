@@ -1,0 +1,42 @@
+diff --git a/node_modules/@matter/node/dist/cjs/behavior/system/network/NetworkClient.js b/node_modules/@matter/node/dist/cjs/behavior/system/network/NetworkClient.js
+index 5f27289..b2761ba 100644
+--- a/node_modules/@matter/node/dist/cjs/behavior/system/network/NetworkClient.js
++++ b/node_modules/@matter/node/dist/cjs/behavior/system/network/NetworkClient.js
+@@ -124,6 +124,16 @@ class NetworkClient extends import_NetworkBehavior.NetworkBehavior {
+             this.events.subscriptionAlive.emit();
+           }
+         },
++        // fork-patch(keepalive-liveness): an empty maximum-interval report proves the
++        // subscription is alive, but it is routed to keepaliveReceived only (see
++        // ClientSubscriptionHandler) and never emits subscriptionAlive — starving
++        // PairedNode.connectionAlive consumers such as a subscription watchdog.
++        // Mirror the updated() liveness emit for keepalives.
++        keepaliveReceived: () => {
++          if (this.internal.activeSubscription?.subscriptionId !== import_protocol.ClientSubscription.NO_SUBSCRIPTION) {
++            this.events.subscriptionAlive.emit();
++          }
++        },
+         closed: () => {
+           if (!(this.internal.activeSubscription instanceof import_protocol.SustainedSubscription)) {
+             this.events.subscriptionStatusChanged.emit(false);
+diff --git a/node_modules/@matter/node/dist/esm/behavior/system/network/NetworkClient.js b/node_modules/@matter/node/dist/esm/behavior/system/network/NetworkClient.js
+index 69de5d0..48b3a65 100644
+--- a/node_modules/@matter/node/dist/esm/behavior/system/network/NetworkClient.js
++++ b/node_modules/@matter/node/dist/esm/behavior/system/network/NetworkClient.js
+@@ -108,6 +108,16 @@ class NetworkClient extends NetworkBehavior {
+             this.events.subscriptionAlive.emit();
+           }
+         },
++        // fork-patch(keepalive-liveness): an empty maximum-interval report proves the
++        // subscription is alive, but it is routed to keepaliveReceived only (see
++        // ClientSubscriptionHandler) and never emits subscriptionAlive — starving
++        // PairedNode.connectionAlive consumers such as a subscription watchdog.
++        // Mirror the updated() liveness emit for keepalives.
++        keepaliveReceived: () => {
++          if (this.internal.activeSubscription?.subscriptionId !== ClientSubscription.NO_SUBSCRIPTION) {
++            this.events.subscriptionAlive.emit();
++          }
++        },
+         closed: () => {
+           if (!(this.internal.activeSubscription instanceof SustainedSubscription)) {
+             this.events.subscriptionStatusChanged.emit(false);
