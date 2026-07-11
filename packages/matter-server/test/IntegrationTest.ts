@@ -13,7 +13,7 @@
 
 import { ServerErrorCode } from "@matter-server/ws-controller";
 import { ChildProcess } from "child_process";
-import { stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import {
     cleanupTempStorage,
     createTempStoragePaths,
@@ -1121,6 +1121,47 @@ describe("Integration Test", function () {
             const backupStat = await stat(`${logFilePath}.1`);
             expect(backupStat.isFile()).to.be.true;
             expect(backupStat.size).to.equal(firstRunLogFileSize);
+        });
+    });
+
+    // =========================================================================
+    // Subscription keepalive liveness (watchdog must not trip on an idle node)
+    // =========================================================================
+
+    describe("Subscription keepalive liveness", function () {
+        // The test light caps its negotiated maxInterval at ~30s (see
+        // TestLightDevice's subscriptionOptions), so the watchdog threshold is
+        // 1.5 × maxInterval + 60s grace ≈ 105-113s, checked every 30s after a 60s
+        // initial delay. 180s of idle comfortably exceeds it: without the
+        // @matter/node keepalive patch the watchdog false-trips inside this window
+        // (verified RED first), while empty keepalives every ~25s keep it quiet.
+        const IDLE_WINDOW_MS = 180_000;
+
+        it("keeps an idle node subscribed without watchdog trips", async function () {
+            this.timeout(IDLE_WINDOW_MS + 120_000);
+
+            const logBefore = await readFile(logFilePath, "utf-8");
+            // Vacuity guard: the watchdog must actually be running for this test to prove anything.
+            expect(logBefore).to.include("Subscription-liveness watchdog enabled");
+
+            await new Promise(resolve => setTimeout(resolve, IDLE_WINDOW_MS));
+
+            const logAfter = (await readFile(logFilePath, "utf-8")).slice(logBefore.length);
+            expect(logAfter, "watchdog tripped on an idle-but-healthy node").to.not.include("forcing resubscribe");
+            expect(logAfter).to.not.include("subscription silent");
+
+            // The original subscription must still deliver fresh data after the idle window.
+            client.clearEvents();
+            const update = client.waitForEvent(
+                "attribute_updated",
+                data => {
+                    const [eventNodeId, path] = data as [number | bigint, string, unknown];
+                    return BigInt(eventNodeId) === BigInt(commissionedNodeId) && path === "1/6/0";
+                },
+                10_000,
+            );
+            await client.deviceCommand(commissionedNodeId, 1, 6, "toggle", {});
+            await update;
         });
     });
 

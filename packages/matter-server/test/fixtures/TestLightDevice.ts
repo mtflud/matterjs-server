@@ -10,7 +10,7 @@
  * Usage: npx tsx test/fixtures/TestLightDevice.ts --storage-path=<path>
  */
 
-import { Environment, ServerNode } from "@matter/main";
+import { Environment, Seconds, ServerNode } from "@matter/main";
 import { OnOffLightDevice } from "@matter/main/devices/on-off-light";
 import { VendorId } from "@matter/main/types";
 import { DEVICE_DISCRIMINATOR, DEVICE_PASSCODE, DEVICE_PORT, MANUAL_PAIRING_CODE } from "../helpers/ProcessHelpers.js";
@@ -30,6 +30,15 @@ env.vars.set("storage.path", storagePath);
 const node = await ServerNode.create({
     network: {
         port,
+        // Keep the negotiated subscription maxInterval short (~30s instead of the
+        // 3-minute device default) so integration tests can observe keepalive
+        // behavior — e.g. the subscription watchdog threshold of
+        // 1.5 × maxInterval + 60s — within a CI-friendly window.
+        subscriptionOptions: {
+            maxInterval: Seconds(30),
+            minInterval: Seconds(2),
+            randomizationWindow: Seconds(5),
+        },
     },
 
     commissioning: {
