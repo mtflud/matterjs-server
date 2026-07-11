@@ -45,10 +45,21 @@ jobs:
         run: |
           echo "tag=${RAW_TAG#v}" >> "$GITHUB_OUTPUT"
 
+      # A release tag is immutable: republishing under the same name would silently
+      # change what deployed add-ons pull. Bump the wd.N suffix instead.
+      - name: Refuse to overwrite an existing release tag
+        env:
+          IMAGE: ghcr.io/mtflud/matterjs-server:${{ steps.tag.outputs.tag }}
+        run: |
+          if docker buildx imagetools inspect "$IMAGE" >/dev/null 2>&1; then
+            echo "::error::$IMAGE already exists — bump the wd.N suffix instead of overwriting"
+            exit 1
+          fi
+
       - uses: docker/build-push-action@v7
         with:
           context: .
-          file: docker/matterjs-server/Dockerfile.dev
+          file: docker/matterjs-server/Dockerfile.fork
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ghcr.io/mtflud/matterjs-server:${{ steps.tag.outputs.tag }}
