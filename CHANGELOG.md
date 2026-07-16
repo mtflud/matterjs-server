@@ -7,6 +7,24 @@ This page shows a detailed overview of the changes between versions without the 
 	## **WORK IN PROGRESS**
 -->
 
+## 1.2.6-wd.5 (2026-07-16)
+
+- Rebase the fork onto upstream 1.2.6 / matter.js 0.17.6 — picks up the upstream
+  peer-session-selection fix ("prefer the session the peer was last heard from,
+  skip peer-lost sessions"), the OTA-reboot resubscribe, and the 0.17.5 ICD and
+  subscription-lifecycle improvements.
+- New: cap the requested subscription max interval (default 300s,
+  `--max-subscription-interval` / `MAX_SUBSCRIPTION_INTERVAL`, 0 disables).
+  Battery devices that negotiated ~10-minute intervals re-negotiate at ~5
+  minutes, bounding the worst-case undetected-dead-subscription window
+  accordingly. The cap only ever lowers an observed negotiated interval; it
+  never raises a node's ceiling. Guarded by unit tests, an end-to-end
+  integration test (first-run application + restart persistence), and a
+  fail-closed CLI parser.
+- ACK-failure fast-resubscribe dist patch regenerated for matter.js 0.17.6
+  (verified upstream has no equivalent; behavioral + canary tests unchanged,
+  9/9).
+
 ## 1.2.6 (2026-07-15)
 
 - Fix: Dashboard now shows the camera Live View/Snapshot button for the Floodlight Camera and Snapshot Camera device types, not just Camera and Video Doorbell
