@@ -5,11 +5,7 @@
  */
 
 import { FabricIndex, NodeId } from "@matter/main";
-import {
-    ClientSubscriptionHandler,
-    IncomingInteractionClientMessenger,
-    PeerAddress,
-} from "@matter/main/protocol";
+import { ClientSubscriptionHandler, IncomingInteractionClientMessenger, PeerAddress } from "@matter/main/protocol";
 import { TlvDataReport } from "@matter/main/types";
 
 // Fork dist patch (see 2026-07-11 ACK-failure fast-resubscribe design):
@@ -91,9 +87,7 @@ describe("ClientSubscriptionAckFailure", () => {
         it("invokes onFinalAckFailure when the final success ack cannot be sent", async () => {
             const failure = new Error("peer-unresponsive (test)");
             let captured: unknown;
-            const messenger = new IncomingInteractionClientMessenger(
-                fakeExchange(() => Promise.reject(failure)),
-            );
+            const messenger = new IncomingInteractionClientMessenger(fakeExchange(() => Promise.reject(failure)));
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const options = { onFinalAckFailure: (error: unknown) => (captured = error) } as any;
             for await (const _report of messenger.readDataReports(options)) {
@@ -105,9 +99,7 @@ describe("ClientSubscriptionAckFailure", () => {
 
         it("does not invoke onFinalAckFailure when the ack succeeds", async () => {
             let invoked = false;
-            const messenger = new IncomingInteractionClientMessenger(
-                fakeExchange(() => Promise.resolve()),
-            );
+            const messenger = new IncomingInteractionClientMessenger(fakeExchange(() => Promise.resolve()));
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const options = { onFinalAckFailure: () => (invoked = true) } as any;
             for await (const _report of messenger.readDataReports(options)) {
