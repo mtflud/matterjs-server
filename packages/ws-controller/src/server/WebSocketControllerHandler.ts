@@ -344,17 +344,13 @@ export class WebSocketControllerHandler implements WebServerHandler {
             // Register all event listeners using ObserverGroup for easy cleanup
             observers.on(this.#commandHandler.events.attributeChanged, (nodeId, data) => {
                 if (this.#closed || this.#shuttingDown || !listening) return;
-                // This observer is shared across every connection; an uncaught throw here (e.g. a
-                // converter fed a poisoned attribute value) would abort the emit and starve the
-                // remaining observers — and the remaining connections — of this and all following
-                // events. Isolate per connection: log and move on, mirroring the guarded
-                // thread-diagnostics observer below.
+                const { endpointId, clusterId, attributeId } = data.path;
+                const pathStr = `${endpointId}/${clusterId}/${attributeId}`;
+                // `data` is emitter-owned; snapshot the value before deferring. Coalesce latest-wins
+                // per (node, path) and convert lazily so a superseded value is never converted.
+                const rawValue = data.value;
+                // Shared Observable: an uncaught throw here aborts the emit and starves other connections.
                 try {
-                    const { endpointId, clusterId, attributeId } = data.path;
-                    const pathStr = `${endpointId}/${clusterId}/${attributeId}`;
-                    // `data` is emitter-owned; snapshot the value before deferring. Coalesce latest-wins
-                    // per (node, path) and convert lazily so a superseded value is never converted.
-                    const rawValue = data.value;
                     connection.sendCoalescable(`attr:${nodeId}/${pathStr}`, () => {
                         const clusterData = ClusterMap[clusterId];
                         const value = convertMatterToWebSocketTagBased(
@@ -371,7 +367,7 @@ export class WebSocketControllerHandler implements WebServerHandler {
                     });
                 } catch (err) {
                     logger.error(
-                        `[${connId}] Failed to handle attributeChanged event for Node ${this.#commandHandler.formatNode(nodeId)}`,
+                        `[${connId}] Failed to send attribute_updated for Node ${this.#commandHandler.formatNode(nodeId)} ${pathStr}`,
                         err,
                     );
                 }
@@ -379,15 +375,14 @@ export class WebSocketControllerHandler implements WebServerHandler {
 
             observers.on(this.#commandHandler.events.eventChanged, (nodeId, data) => {
                 if (this.#closed || this.#shuttingDown || !listening) return;
-                // Same isolation rationale as attributeChanged above: this observer is shared across
-                // every connection, so a throw while converting one connection's event data must not
-                // starve the others.
-                try {
-                    const { path, events } = data;
-                    const { endpointId, clusterId, eventId } = path;
-                    const clusterData = ClusterMap[clusterId];
+                const { path, events } = data;
+                const { endpointId, clusterId, eventId } = path;
+                const clusterData = ClusterMap[clusterId];
 
-                    for (const event of events) {
+                for (const event of events) {
+                    // Shared Observable: an uncaught throw aborts the emit and starves other connections;
+                    // per event so one bad payload doesn't drop the rest of the batch.
+                    try {
                         let timestamp: number | bigint;
                         let timestampType: number;
 
@@ -420,7 +415,6 @@ export class WebSocketControllerHandler implements WebServerHandler {
                             data: convertedData,
                         };
 
-                        // Store event in the history buffer
                         this.#addEventToHistory(nodeEvent);
 
                         logger.debug(
@@ -428,12 +422,12 @@ export class WebSocketControllerHandler implements WebServerHandler {
                             nodeEvent,
                         );
                         connection.sendOrdered(toBigIntAwareJson({ event: "node_event", data: nodeEvent }));
+                    } catch (err) {
+                        logger.error(
+                            `[${connId}] Failed to send node_event for Node ${this.#commandHandler.formatNode(nodeId)}`,
+                            err,
+                        );
                     }
-                } catch (err) {
-                    logger.error(
-                        `[${connId}] Failed to handle eventChanged event for Node ${this.#commandHandler.formatNode(nodeId)}`,
-                        err,
-                    );
                 }
             });
 
@@ -544,39 +538,25 @@ export class WebSocketControllerHandler implements WebServerHandler {
                 connection.dispose();
             };
 
-            ws.on(
-                "message",
-                data =>
-                    // `.then(onFulfilled).catch(handler)` rather than the two-argument
-                    // `.then(onFulfilled, onRejected)`: the two-argument form only catches a rejection
-                    // of #handleWebSocketRequest itself, not a throw raised by onFulfilled — and
-                    // onFulfilled's serialization (toBigIntAwareJson) can throw on a pathological
-                    // response after the command already resolved successfully. Chaining .catch()
-                    // after .then() covers both, instead of leaking that throw as an unhandled
-                    // rejection.
-                    void this.#handleWebSocketRequest(connId, connection, data.toString())
-                        .then(
-                            ({
-                                response,
-                                enableListeners,
-                                wantsThreadDiagnostics: requested,
-                                wantsWebRtc: reqWebRtc,
-                            }) => {
-                                if (this.#closed) return;
-                                if (enableListeners) {
-                                    listening = true;
-                                }
-                                if (requested) {
-                                    wantsThreadDiagnostics = true;
-                                }
-                                if (reqWebRtc) {
-                                    wantsWebRtc = true;
-                                }
-                                connection.sendReliable(toBigIntAwareJson(response));
-                            },
-                        )
-                        .catch(err => logger.error(`[${connId}] WebSocket request error`, err)),
-            );
+            ws.on("message", data => {
+                this.#handleWebSocketRequest(connId, connection, data.toString())
+                    .then(
+                        ({ response, enableListeners, wantsThreadDiagnostics: requested, wantsWebRtc: reqWebRtc }) => {
+                            if (this.#closed) return;
+                            if (enableListeners) {
+                                listening = true;
+                            }
+                            if (requested) {
+                                wantsThreadDiagnostics = true;
+                            }
+                            if (reqWebRtc) {
+                                wantsWebRtc = true;
+                            }
+                            connection.sendReliable(toBigIntAwareJson(response));
+                        },
+                    )
+                    .catch(err => logger.error(`[${connId}] WebSocket request error`, err));
+            });
 
             ws.on("close", onClose);
             ws.on("error", err => {
@@ -584,8 +564,6 @@ export class WebSocketControllerHandler implements WebServerHandler {
                 onClose();
             });
 
-            // Same rationale as above: .catch() after .then() so a throw while serializing the
-            // server-info response is caught instead of leaking as an unhandled rejection.
             this.#getServerInfo()
                 .then(response => {
                     logger.debug(`[${connId}] Sending server info`);

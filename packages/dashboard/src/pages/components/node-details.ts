@@ -23,10 +23,18 @@ import { showNodeLabelDialog } from "../../components/dialogs/node-label-dialog/
 import { handleAsync } from "../../util/async-handler.js";
 import "../../components/ha-svg-icon";
 import "../camera-overlay.js";
-import { getDeviceIcon } from "../../util/device-icons.js";
+import { DeviceTypes, getDeviceIcon } from "../../util/device-icons.js";
 import { getEndpointDeviceTypes } from "../../util/endpoints.js";
 import { ICD_CLUSTER_ID, icdBadge } from "../../util/icd.js";
+import { formatManualPairingCode, renderPairingQrCodeDataUri } from "../../util/pairing-code.js";
 import { bindingContext } from "./context.js";
+
+const CAMERA_DEVICE_TYPE_IDS: number[] = [
+    DeviceTypes.CAMERA,
+    DeviceTypes.VIDEO_DOORBELL,
+    DeviceTypes.FLOODLIGHT_CAMERA,
+    DeviceTypes.SNAPSHOT_CAMERA,
+];
 
 /** Map updateState values to user-friendly labels */
 const UPDATE_STATE_LABELS: Record<number, string> = {
@@ -80,7 +88,7 @@ export class NodeDetails extends LitElement {
         if (!this.node) return html``;
 
         const deviceTypeIds = getEndpointDeviceTypes(this.node, this.endpoint).map(d => d.id);
-        const isCamera = deviceTypeIds.includes(0x0142) || deviceTypeIds.includes(0x0143);
+        const isCamera = CAMERA_DEVICE_TYPE_IDS.some(id => deviceTypeIds.includes(id));
         const badge = icdBadge(this.node.attributes, this.node.available);
 
         return html`
@@ -199,7 +207,6 @@ export class NodeDetails extends LitElement {
                 title: "Reinterview node",
                 text: "Success!",
             });
-            location.hash = "#";
         } catch (err: any) {
             showAlertDialog({
                 title: "Failed to reinterview node",
@@ -321,9 +328,21 @@ export class NodeDetails extends LitElement {
         }
         try {
             const shareCode = await this.client.openCommissioningWindow(this.node!.node_id);
+            const manualCode = formatManualPairingCode(shareCode.setup_manual_code);
+            const qrDataUri = renderPairingQrCodeDataUri(shareCode.setup_qr_code);
             showAlertDialog({
                 title: "Share device",
-                text: `Setup code: ${shareCode.setup_manual_code}`,
+                text: html`
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+                        <img src=${qrDataUri} alt="Commissioning QR code" style="width:200px;height:200px;" />
+                        <div style="text-align:center;">
+                            <div style="font-size:0.8rem;color:var(--md-sys-color-on-surface-variant);">Setup code</div>
+                            <div style="font-size:1.4rem;font-family:monospace;letter-spacing:0.05em;">
+                                ${manualCode}
+                            </div>
+                        </div>
+                    </div>
+                `,
             });
         } catch (err: any) {
             showAlertDialog({

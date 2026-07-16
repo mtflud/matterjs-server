@@ -7,9 +7,37 @@ This page shows a detailed overview of the changes between versions without the 
 	## **WORK IN PROGRESS**
 -->
 
+## 1.2.6 (2026-07-15)
+
+- Fix: Dashboard now shows the camera Live View/Snapshot button for the Floodlight Camera and Snapshot Camera device types, not just Camera and Video Doorbell
+- Fix: Dashboard `ProvideOffer` requests now include `videoStreams`/`audioStreams` alongside deprecated singular stream IDs for WebRTC provider compatibility across cluster revisions
+- Enhancement: Update matter.js to latest 0.17.6 alpha
+    - Optimizes OTA software updates
+    - Prevents blocking on stop when a BLE discovery is still in progress
+
+## 1.2.5 (2026-07-13)
+
+- Enhancement: Update matter.js to 0.17.5
+- Enhancement: Add a QR code when using the dashboard to share a device
+- Enhancement: Clarify Thread node role and unknown/external device descriptions in the network visualization (e.g. what a REED is, why a device shows as unknown/external) and link the OpenThread role primer
+
+## 1.2.4 (2026-07-12)
+
+- Enhancement: Update Docker base images to Debian trixie with the current Node 24 version
+- Fix: Some more camera fixes in the dashboard
+- Fix: Dashboard resets scroll position on navigation and focuses cluster command panels (ICD, ACL, Binding)
+- Fix: Update matter.js to the latest 0.17.5 nightly
+    - Tolerate non-compliant peers omitting mandatory Descriptor lists
+
+## 1.2.3 (2026-07-11)
+
+- Enhancement: Thread diagnostics fetch a Border Router's dataset via REST when no credentials are stored, enabling the faster MeshCoP (CoAP) transport instead of the slower REST collection
+- Fix: Update WebRTC and Camera-related logic to respect available Pixelrate and Encoders of the camera device
+- Fix: Optimize startup behavior
+
 ## 1.2.2 (2026-07-10)
 
-- Fix: Ensure that WebSocket backpressure keeps the send window full instead of draining one frame at a time, avoiding initial-sync stalls behind a high-latency proxy (e.g. Home Assistant ingress) that could drop the dashboard connection
+- Fix: Ensure that WebSocket backpressure keeps the send-window full instead of draining one frame at a time, avoiding initial-sync stalls behind a high-latency proxy (e.g. Home Assistant ingress) that could drop the dashboard connection
 - Fix: Optimize TBR address and data handling
 - Fix: Update WebRTC and Camera-related logic and respect separate Audio/Video streams in Dashboard
 - Fix: Update matter.js to the latest 0.17.5 nightly
