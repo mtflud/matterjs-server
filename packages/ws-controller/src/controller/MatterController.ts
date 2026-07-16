@@ -93,6 +93,8 @@ export interface MatterControllerOptions {
     enableTimeSync?: boolean;
     /** Detect silently-dead node subscriptions and force a resubscribe. Defaults to true. */
     subscriptionWatchdog?: boolean;
+    /** Cap the requested subscription max interval (seconds); bounds how long a dead subscription can go undetected. 0/undefined disables. */
+    maxSubscriptionIntervalSeconds?: number;
     /**
      * Disable the Thread Border Router subsystem: no mDNS BR discovery, no REST/CoAP
      * probing or diagnostics. Matter-over-Thread commissioning (which reads the stored
@@ -192,6 +194,7 @@ export class MatterController {
     #bleProxyEnabled = false;
     #enableTimeSync = false;
     #subscriptionWatchdog = true;
+    #maxSubscriptionIntervalSeconds: number | undefined;
     #threadDiagnosticsDisabled = false;
     readonly #borderRouterRegistry: BorderRouterRegistry;
     /** Background init tasks kept off the node-init critical path but given a bounded chance to settle on stop(). */
@@ -282,6 +285,7 @@ export class MatterController {
         this.#bleProxyEnabled = options.bleProxyEnabled ?? this.#bleProxyEnabled;
         this.#enableTimeSync = options.enableTimeSync ?? this.#enableTimeSync;
         this.#subscriptionWatchdog = options.subscriptionWatchdog ?? this.#subscriptionWatchdog;
+        this.#maxSubscriptionIntervalSeconds = options.maxSubscriptionIntervalSeconds;
         this.#threadDiagnosticsDisabled = options.disableThreadDiagnostics ?? this.#threadDiagnosticsDisabled;
         this.#services = this.#env.asDependent();
         this.#threadDiagnostics = new ThreadDiagnosticsService({
@@ -395,6 +399,7 @@ export class MatterController {
                 !this.#disableOtaProvider,
                 this.#enableTimeSync,
                 this.#subscriptionWatchdog,
+                this.#maxSubscriptionIntervalSeconds,
             );
 
             this.#commandHandler.events.started.once(async () => {

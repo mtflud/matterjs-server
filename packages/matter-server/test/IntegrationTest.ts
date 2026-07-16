@@ -77,7 +77,14 @@ describe("Integration Test", function () {
         // Start server (local child process by default, or the CI Docker image
         // when MATTER_TEST_SERVER_MODE=docker). start() waits for the WS port.
         console.log("Starting server...");
-        server = createServerController({ storagePath: serverStoragePath, logFilePath });
+        // Cap of 15s (below the test light's 30s subscriptionOptions.maxInterval) exercises the
+        // subscription max-interval cap end to end; 15s keeps the requested ceiling (cap + up to
+        // 10s controller-side jitter) deterministically below 30s. See the cap describe below.
+        server = createServerController({
+            storagePath: serverStoragePath,
+            logFilePath,
+            extraArgs: ["--max-subscription-interval=15"],
+        });
         await server.start();
         console.log("Server is ready");
 
@@ -1121,6 +1128,65 @@ describe("Integration Test", function () {
             const backupStat = await stat(`${logFilePath}.1`);
             expect(backupStat.isFile()).to.be.true;
             expect(backupStat.size).to.equal(firstRunLogFileSize);
+        });
+    });
+
+    // =========================================================================
+    // Subscription max-interval cap (first-run application + restart persistence)
+    // =========================================================================
+
+    describe("Subscription max-interval cap", function () {
+        /** Matches e.g. `Subscription successful « … interval: 23s timeout: …` — intervals under a minute print as bare seconds. */
+        function subscriptionIntervals(log: string): number[] {
+            return [...log.matchAll(/Subscription successful[^\n]*interval: (\d+)s/g)].map(m => Number(m[1]));
+        }
+
+        it("capped the first run once and actually re-subscribed below the device's 30s", async function () {
+            const firstRunLog = await readFile(`${logFilePath}.1`, "utf-8");
+            expect(firstRunLog).to.include("Subscription max-interval cap enabled: 15s");
+
+            // Exactly one application — more means a renegotiation loop.
+            const capLines = firstRunLog
+                .split("\n")
+                .filter(line => line.includes("exceeds cap 15s; requesting lower ceiling"));
+            expect(capLines.length, "cap must apply exactly once on first run").to.equal(1);
+
+            // The cap must CAUSE a resubscription: initial subscribe (~30s) plus the cap-triggered
+            // replacement — at least two successful subscriptions, the last at 15-25s (< 30s).
+            const intervals = subscriptionIntervals(firstRunLog);
+            expect(intervals.length, "expected the initial subscription plus the cap-triggered resubscribe").to.be.gte(
+                2,
+            );
+            const finalInterval = intervals[intervals.length - 1];
+            expect(finalInterval, "final negotiated interval must honor the capped ceiling (15s + <=10s jitter)")
+                .to.be.gte(15)
+                .and.lte(25);
+        });
+
+        it("after restart, reuses the persisted cap: subscribes capped WITHOUT re-applying", async function () {
+            this.timeout(45_000);
+            // The suite's restart test tolerates a node that fails to reconnect (it warns and returns),
+            // so first REQUIRE a post-restart subscription — otherwise the no-reapply check is vacuous.
+            let currentLog = "";
+            const deadline = Date.now() + 30_000;
+            while (Date.now() < deadline) {
+                currentLog = await readFile(logFilePath, "utf-8");
+                if (subscriptionIntervals(currentLog).length > 0) break;
+                await new Promise(resolve => setTimeout(resolve, 1_000));
+            }
+            const intervals = subscriptionIntervals(currentLog);
+            if (intervals.length === 0) {
+                // Mirror the restart test's documented tolerance for reconnect flakiness — skip loudly
+                // rather than pass a vacuous assertion.
+                this.skip();
+                return;
+            }
+            expect(intervals[0], "restarted node must subscribe at the persisted capped ceiling directly")
+                .to.be.gte(15)
+                .and.lte(25);
+            expect(currentLog, "restart must reuse the persisted cap, not re-apply it").to.not.include(
+                "exceeds cap 15s; requesting lower ceiling",
+            );
         });
     });
 

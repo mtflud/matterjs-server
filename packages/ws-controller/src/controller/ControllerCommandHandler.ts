@@ -105,6 +105,12 @@ import { pingIp } from "../util/network.js";
 import { runConnectedCacheRepair } from "./connectedCacheRepair.js";
 import { CustomClusterPoller } from "./CustomClusterPoller.js";
 import { Nodes } from "./Nodes.js";
+import {
+    maybeCapSubscriptionInterval,
+    sanitizeCapSeconds,
+    shouldClearPersistedDefaultSubscription,
+    subscriptionCapNodeOf,
+} from "./subscriptionIntervalCap.js";
 import { SubscriptionWatchdog } from "./SubscriptionWatchdog.js";
 import { pushNodeTime, TimeSyncInvokers } from "./timeSyncCommands.js";
 import { TIME_FAILURE_EVENT_ID, TIME_SYNC_CLUSTER_ID, TimeSyncManager } from "./TimeSyncManager.js";
@@ -165,6 +171,7 @@ export class ControllerCommandHandler {
     #timeSyncManager?: TimeSyncManager;
     /** Detects silently-dead subscriptions and forces a resubscribe */
     #subscriptionWatchdog?: SubscriptionWatchdog;
+    #maxSubscriptionIntervalSeconds: number | undefined;
     /** Per-node ObserverGroups for cleanup on decommission */
     #nodeObservers = new Map<NodeId, ObserverGroup>();
     /** Per-node timers that fire when Reconnecting state exceeds the timeout */
@@ -201,8 +208,14 @@ export class ControllerCommandHandler {
         otaEnabled: boolean,
         timeSyncEnabled = false,
         subscriptionWatchdogEnabled = true,
+        maxSubscriptionIntervalSeconds: number | undefined = undefined,
     ) {
         this.#controller = controllerInstance;
+
+        this.#maxSubscriptionIntervalSeconds = sanitizeCapSeconds(maxSubscriptionIntervalSeconds);
+        if (this.#maxSubscriptionIntervalSeconds !== undefined) {
+            logger.info(`Subscription max-interval cap enabled: ${this.#maxSubscriptionIntervalSeconds}s`);
+        }
 
         this.#bleEnabled = bleEnabled;
         this.#bleProxyEnabled = bleProxyEnabled;
@@ -255,6 +268,29 @@ export class ControllerCommandHandler {
             throw new Error(`Cannot resolve PeerAddress for node ${nodeId}: controller fabric is not initialized`);
         }
         return PeerAddress({ fabricIndex: fabric.fabricIndex, nodeId });
+    }
+
+    /**
+     * Bound how long a silently-dead subscription can go undetected: when a node's
+     * negotiated subscription interval exceeds the configured cap, request a lower
+     * ceiling via NetworkClient.defaultSubscription (matter.js re-subscribes on that
+     * state change). Fire-and-forget from connection handling; the requested-ceiling
+     * guard in the cap module makes repeat invocations no-ops.
+     */
+    #maybeCapSubscriptionInterval(node: PairedNode): void {
+        const capSeconds = this.#maxSubscriptionIntervalSeconds;
+        if (capSeconds === undefined) return;
+        maybeCapSubscriptionInterval(subscriptionCapNodeOf(node), capSeconds)
+            .then(result => {
+                if (result.applied) {
+                    logger.info(
+                        `Node ${this.formatNode(node.nodeId)}: negotiated subscription interval ${result.negotiatedIntervalSeconds}s exceeds cap ${capSeconds}s; requesting lower ceiling`,
+                    );
+                }
+            })
+            .catch(error =>
+                logger.warn(`Failed to cap subscription interval for node ${this.formatNode(node.nodeId)}:`, error),
+            );
     }
 
     /**
@@ -622,7 +658,10 @@ export class ControllerCommandHandler {
                 this.#timeSyncManager?.registerNode(peer, attributes);
             }
         }
-        if (node.isConnected) this.#subscriptionWatchdog?.registerNode(this.#peerOf(nodeId));
+        if (node.isConnected) {
+            this.#subscriptionWatchdog?.registerNode(this.#peerOf(nodeId));
+            this.#maybeCapSubscriptionInterval(node);
+        }
 
         return node;
     }
@@ -679,6 +718,7 @@ export class ControllerCommandHandler {
         if (state === NodeStates.Connected) {
             const peer = this.#peerOf(nodeId);
             this.#subscriptionWatchdog?.registerNode(peer);
+            this.#maybeCapSubscriptionInterval(node);
             await runConnectedCacheRepair({
                 fastReconnect,
                 watchdogRepair: this.#subscriptionWatchdog?.consumePendingRepair(peer) ?? false,
@@ -741,8 +781,15 @@ export class ControllerCommandHandler {
             try {
                 const node = this.#nodes.get(nodeId);
 
-                if (node.node.maybeStateOf(NetworkClient)?.defaultSubscription !== undefined) {
-                    // Clear former set subscription details, let matter.js handle that now
+                const defaultSubscription = node.node.maybeStateOf(NetworkClient)?.defaultSubscription;
+                if (
+                    shouldClearPersistedDefaultSubscription(defaultSubscription, this.#maxSubscriptionIntervalSeconds)
+                ) {
+                    // Clear former set subscription details, let matter.js handle that now. A persisted
+                    // fork interval cap matching the current configuration is kept so a known-capped node
+                    // subscribes once at the capped ceiling instead of renegotiating from the device
+                    // default and re-subscribing after the cap re-applies; changed or disabled caps are
+                    // cleared like any other stale state (decision unit-tested in the cap module).
                     await node.node.set({ network: { defaultSubscription: undefined } });
                 }
 

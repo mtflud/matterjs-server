@@ -21,6 +21,8 @@ export interface ServerControllerOptions {
     logFilePath: string;
     logLevel?: string;
     enableTestNetDcl?: boolean;
+    /** Extra CLI arguments appended to the server command line (--flag=value tokens). */
+    extraArgs?: string[];
 }
 
 export interface ServerController {
@@ -46,6 +48,7 @@ export class LocalProcessServerController implements ServerController {
             this.#options.logFilePath,
             this.#options.logLevel,
             this.#options.enableTestNetDcl ?? true,
+            this.#options.extraArgs ?? [],
         );
         await waitForPort(SERVER_PORT);
     }
@@ -142,6 +145,7 @@ export class DockerServerController implements ServerController {
         if (enableTestNetDcl ?? true) {
             args.push("--enable-test-net-dcl");
         }
+        args.push(...(this.#options.extraArgs ?? []));
         return args;
     }
 

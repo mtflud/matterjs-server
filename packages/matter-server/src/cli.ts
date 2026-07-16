@@ -73,6 +73,9 @@ export interface CliOptions {
     // Subscription liveness watchdog configuration
     subscriptionWatchdog: boolean;
 
+    // Subscription max-interval cap (seconds); 0 disables
+    maxSubscriptionInterval: number;
+
     // Dashboard configuration
     disableDashboard: boolean;
     productionMode: boolean;
@@ -101,6 +104,15 @@ function parseBooleanEnv(value: string | boolean | undefined): boolean {
     if (lower === "" || ["false", "0", "no", "off"].includes(lower)) return false;
     if (["true", "1", "yes", "on"].includes(lower)) return true;
     throw new InvalidArgumentError(`Invalid boolean value: "${value}". Use true/false, 1/0, yes/no, or on/off.`);
+}
+
+/** Parse a subscription-interval cap: integer seconds 0..65535 (0 disables). Exported for tests. */
+export function parseIntervalSeconds(value: string): number {
+    const seconds = Number.parseInt(value, 10);
+    if (!Number.isInteger(seconds) || String(seconds) !== value.trim() || seconds < 0 || seconds > 0xffff) {
+        throw new InvalidArgumentError(`Invalid interval "${value}". Use an integer 0-65535 (0 disables).`);
+    }
+    return seconds;
 }
 
 /** Deprecated options that are still accepted but no longer used */
@@ -225,6 +237,15 @@ export function parseCliArgs(argv?: string[]): CliOptions {
                 .env("SUBSCRIPTION_WATCHDOG"),
         )
         .addOption(
+            new Option(
+                "--max-subscription-interval <seconds>",
+                "Cap the requested subscription max interval in seconds. Bounds how long a silently-dead subscription can go undetected on battery devices. 0 disables the cap.",
+            )
+                .argParser(parseIntervalSeconds)
+                .default(300)
+                .env("MAX_SUBSCRIPTION_INTERVAL"),
+        )
+        .addOption(
             new Option("--disable-dashboard [value]", "Disable the web dashboard")
                 .argParser(parseBooleanEnv)
                 .preset(true)
@@ -320,6 +341,7 @@ export function parseCliArgs(argv?: string[]): CliOptions {
         otaProviderDir: opts.otaProviderDir ?? null,
         enableTimeSync: opts.enableTimeSync,
         subscriptionWatchdog: opts.subscriptionWatchdog,
+        maxSubscriptionInterval: opts.maxSubscriptionInterval,
         disableDashboard: opts.disableDashboard,
         productionMode: opts.productionMode,
         disableThreadDiagnostics: opts.disableThreadDiagnostics,

@@ -67,6 +67,7 @@ export function startServer(
     logFilePath?: string,
     logLevel = process.env.MATTER_LOG_LEVEL ?? "info",
     enableTestNetDcl = true,
+    extraArgs: string[] = [],
 ): ChildProcess {
     const args = [
         "--enable-source-maps",
@@ -81,6 +82,7 @@ export function startServer(
     if (logFilePath !== undefined) {
         args.push(`--log-file=${logFilePath}`);
     }
+    args.push(...extraArgs);
     const serverProcess = spawn("node", args, {
         cwd: process.cwd(),
         detached: true,
