@@ -45,6 +45,7 @@ import {
 } from "@matter/main/clusters";
 import { WebRtcTransportDefinitions } from "@matter/main/clusters/web-rtc-transport-definitions";
 import { WebRtcTransportProvider } from "@matter/main/clusters/web-rtc-transport-provider";
+import { ClusterRevision } from "@matter/main/model";
 import { DeviceAttestationCheck, Invoke, PeerAddress, Read, Specifier, PeerSet } from "@matter/main/protocol";
 import {
     AttributeId,
@@ -104,6 +105,7 @@ import { formatNodeId } from "../util/formatNodeId.js";
 import { pingIp } from "../util/network.js";
 import { runConnectedCacheRepair } from "./connectedCacheRepair.js";
 import { CustomClusterPoller } from "./CustomClusterPoller.js";
+import { NodeAttributeReader } from "./NodeProcessor.js";
 import { Nodes } from "./Nodes.js";
 import {
     maybeCapSubscriptionInterval,
@@ -112,10 +114,15 @@ import {
     subscriptionCapNodeOf,
 } from "./subscriptionIntervalCap.js";
 import { SubscriptionWatchdog } from "./SubscriptionWatchdog.js";
+import { ThreadDetailsPoller } from "./ThreadDetailsPoller.js";
 import { pushNodeTime, TimeSyncInvokers } from "./timeSyncCommands.js";
-import { TIME_FAILURE_EVENT_ID, TIME_SYNC_CLUSTER_ID, TimeSyncManager } from "./TimeSyncManager.js";
+import { SyncTrigger, TIME_FAILURE_EVENT_ID, TIME_SYNC_CLUSTER_ID, TimeSyncManager } from "./TimeSyncManager.js";
 import { attachWebRtcCallbackBridge } from "./WebRtcCallbackBridge.js";
-import { isTrackableWebRtcSession, resolveWebRtcSessionStreams } from "./webRtcSessionStreams.js";
+import {
+    isTrackableWebRtcSession,
+    resolveWebRtcSessionStreams,
+    selectWebRtcStreamFields,
+} from "./webRtcSessionStreams.js";
 
 const logger = Logger.get("ControllerCommandHandler");
 
@@ -172,10 +179,13 @@ export class ControllerCommandHandler {
     /** Detects silently-dead subscriptions and forces a resubscribe */
     #subscriptionWatchdog?: SubscriptionWatchdog;
     #maxSubscriptionIntervalSeconds: number | undefined;
+    #threadDetailsPoller?: ThreadDetailsPoller;
     /** Per-node ObserverGroups for cleanup on decommission */
     #nodeObservers = new Map<NodeId, ObserverGroup>();
     /** Per-node timers that fire when Reconnecting state exceeds the timeout */
     #reconnectTimers = new Map<NodeId, Timer>();
+    /** Per-node timers that coalesce basic-info changes into a single delayed node_updated refresh. */
+    #nodeUpdateTimers = new Map<NodeId, Timer>();
     /**
      * Nodes whose basic information changed within the current subscription batch. A full node_updated
      * is deferred until the batch ends (connectionAlive) so consumers see one update per batch.
@@ -207,6 +217,7 @@ export class ControllerCommandHandler {
         bleProxyEnabled: boolean,
         otaEnabled: boolean,
         timeSyncEnabled = false,
+        threadDiagnosticsEnabled = false,
         subscriptionWatchdogEnabled = true,
         maxSubscriptionIntervalSeconds: number | undefined = undefined,
     ) {
@@ -222,19 +233,26 @@ export class ControllerCommandHandler {
         logger.info(`BLE is ${bleEnabled ? "enabled" : "disabled"}${bleProxyEnabled ? " (proxy mode)" : ""}`);
         this.#otaEnabled = otaEnabled;
 
-        // Initialize custom cluster poller for Eve energy attributes etc.
-        // Reads automatically trigger change events through the normal attribute flow
-        this.#customClusterPoller = new CustomClusterPoller({
+        const attributeReader: NodeAttributeReader = {
             nodeConnected: peer => !!(this.#nodes.has(peer.nodeId) && this.#nodes.get(peer.nodeId).isConnected),
             handleReadAttributes: (peer, paths, fabricFiltered) =>
                 this.handleReadAttributes(peer.nodeId, paths, fabricFiltered),
-        });
+        };
+
+        // Initialize custom cluster poller for Eve energy attributes etc.
+        // Reads automatically trigger change events through the normal attribute flow
+        this.#customClusterPoller = new CustomClusterPoller(attributeReader);
+
+        if (threadDiagnosticsEnabled) {
+            this.#threadDetailsPoller = new ThreadDetailsPoller(attributeReader);
+        }
 
         if (timeSyncEnabled) {
             logger.info("Time synchronization enabled");
             this.#timeSyncManager = new TimeSyncManager({
                 syncTime: peer => this.#syncNodeTime(peer.nodeId),
                 nodeConnected: peer => !!(this.#nodes.has(peer.nodeId) && this.#nodes.get(peer.nodeId).isConnected),
+                commissionedNodeCount: () => this.#controller.getCommissionedNodes().length,
             });
         }
 
@@ -435,6 +453,12 @@ export class ControllerCommandHandler {
             originatingEndpointId,
         };
 
+        const clusterRevision =
+            this.#nodes.attributeCache.get(nodeId)?.[
+                `${endpointId}/${WebRtcTransportProvider.id}/${ClusterRevision.id}`
+            ];
+        selectWebRtcStreamFields(fields, clusterRevision);
+
         const response = (await this.#invokeCommand(node.node, {
             endpoint: endpointId,
             cluster: WebRtcTransportProvider,
@@ -452,13 +476,13 @@ export class ControllerCommandHandler {
         const metadataEnabled = convertedPayload.metadataEnabled === true;
 
         const videoStreams = resolveWebRtcSessionStreams(
-            convertedPayload.videoStreams,
-            convertedPayload.videoStreamId,
+            fields.videoStreams,
+            fields.videoStreamId,
             response.videoStreamId,
         );
         const audioStreams = resolveWebRtcSessionStreams(
-            convertedPayload.audioStreams,
-            convertedPayload.audioStreamId,
+            fields.audioStreams,
+            fields.audioStreamId,
             response.audioStreamId,
         );
 
@@ -569,13 +593,29 @@ export class ControllerCommandHandler {
             timer.stop();
         }
         this.#reconnectTimers.clear();
-        await this.#customClusterPoller.stop();
-        await this.#timeSyncManager?.stop();
-        await this.#subscriptionWatchdog?.stop();
+        for (const timer of this.#nodeUpdateTimers.values()) {
+            timer.stop();
+        }
+        this.#nodeUpdateTimers.clear();
+        // Observers first: a state change reaching #handleNodeStateChange re-registers the node with
+        // every processor, so stopping them first leaves the processors re-populated.
         for (const observers of this.#nodeObservers.values()) {
             observers.close();
         }
         this.#nodeObservers.clear();
+        // Each stop() awaits an in-flight read against a possibly unresponsive node; serially they
+        // stack their timeouts, and a throw from one would skip the rest of the shutdown.
+        const stopped = await Promise.allSettled([
+            this.#customClusterPoller.stop(),
+            this.#threadDetailsPoller?.stop(),
+            this.#timeSyncManager?.stop(),
+            this.#subscriptionWatchdog?.stop(),
+        ]);
+        for (const result of stopped) {
+            if (result.status === "rejected") {
+                logger.warn("Stopping a node processor failed:", result.reason);
+            }
+        }
         if (!this.#started) {
             return;
         }
@@ -607,9 +647,17 @@ export class ControllerCommandHandler {
         });
         nodeObservers.on(node.events.connectionAlive, () => {
             this.#subscriptionWatchdog?.recordAlive(this.#peerOf(nodeId));
-            if (this.#basicInfoChangedInBatch.delete(nodeId)) {
-                logger.info(`Node ${this.formatNode(nodeId)} basic information changed, sending full node_updated`);
-                this.events.nodeStructureChanged.emit(nodeId);
+            if (this.#basicInfoChangedInBatch.delete(nodeId) && !this.#nodeUpdateTimers.has(nodeId)) {
+                logger.info(
+                    `Node ${this.formatNode(nodeId)} basic information changed, sending full node_updated in 6s`,
+                );
+                // TODO remove timer based refresh when migrating to the ClientNode API for events
+                const timer = Time.getTimer(`node-update-${nodeId}`, Seconds(6), () =>
+                    this.#handleNodeStructureChange(node).catch(error =>
+                        logger.warn(`Failed to handle structure change for node ${this.formatNode(nodeId)}:`, error),
+                    ),
+                ).start();
+                this.#nodeUpdateTimers.set(nodeId, timer);
             }
         });
         nodeObservers.on(node.events.eventTriggered, data => {
@@ -620,8 +668,8 @@ export class ControllerCommandHandler {
                 data.path.clusterId === TIME_SYNC_CLUSTER_ID &&
                 data.path.eventId === TIME_FAILURE_EVENT_ID
             ) {
-                logger.debug(`Received timeFailure event from node ${this.formatNode(nodeId)}, triggering time sync`);
-                this.#timeSyncManager.syncNode(this.#peerOf(nodeId));
+                logger.debug(`Received timeFailure event from node ${this.formatNode(nodeId)}`);
+                this.#timeSyncManager.syncNode(this.#peerOf(nodeId), SyncTrigger.TimeFailure);
             }
         });
         nodeObservers.on(node.events.stateChanged, state => {
@@ -655,6 +703,7 @@ export class ControllerCommandHandler {
             if (attributes) {
                 const peer = this.#peerOf(nodeId);
                 this.#customClusterPoller.registerNode(peer, attributes);
+                this.#threadDetailsPoller?.registerNode(peer, attributes);
                 this.#timeSyncManager?.registerNode(peer, attributes);
             }
         }
@@ -729,6 +778,7 @@ export class ControllerCommandHandler {
             const attributes = this.#nodes.attributeCache.get(nodeId);
             if (attributes) {
                 this.#customClusterPoller.registerNode(peer, attributes);
+                this.#threadDetailsPoller?.registerNode(peer, attributes);
                 this.#timeSyncManager?.registerNode(peer, attributes);
             }
         }
@@ -738,10 +788,14 @@ export class ControllerCommandHandler {
         const nodeId = node.nodeId;
         this.#basicInfoChangedInBatch.delete(nodeId);
 
+        this.#nodeUpdateTimers.get(nodeId)?.stop();
+        this.#nodeUpdateTimers.delete(nodeId);
+
         if (node.isConnected) {
             await this.#nodes.attributeCache.update(node);
         }
         this.events.nodeStructureChanged.emit(nodeId);
+
         for (const endpointId of this.#nodes.drainPendingEndpointAdds(nodeId)) {
             this.events.nodeEndpointAdded.emit(nodeId, endpointId);
         }
@@ -1226,8 +1280,7 @@ export class ControllerCommandHandler {
                     for (const f of findings) {
                         if (f.type === DeviceAttestationCheck.TrustedAsTestCertificate) {
                             testCertReason =
-                                'Device uses a test/development certificate. Enable the "Test Net DCL" option ' +
-                                "(--enable-test-net-dcl) to commission test or development devices";
+                                'This device uses a test/development certificate. To commission it, enable the "Test DCL" option in the settings — only do this if you trust the vendor.';
                         } else if (f.level === "error") {
                             hardError = true;
                         }
@@ -1477,6 +1530,8 @@ export class ControllerCommandHandler {
     #cleanupNodeAfterRemoval(nodeId: NodeId) {
         this.#reconnectTimers.get(nodeId)?.stop();
         this.#reconnectTimers.delete(nodeId);
+        this.#nodeUpdateTimers.get(nodeId)?.stop();
+        this.#nodeUpdateTimers.delete(nodeId);
         this.#nodeObservers.get(nodeId)?.close();
         this.#nodeObservers.delete(nodeId);
         this.#basicInfoChangedInBatch.delete(nodeId);
@@ -1484,6 +1539,7 @@ export class ControllerCommandHandler {
         this.#nodes.delete(nodeId);
         const peer = this.#peerOf(nodeId);
         this.#customClusterPoller.unregisterNode(peer);
+        this.#threadDetailsPoller?.unregisterNode(peer);
         this.#timeSyncManager?.unregisterNode(peer);
         this.#subscriptionWatchdog?.unregisterNode(peer);
         this.#availableUpdates.delete(nodeId);

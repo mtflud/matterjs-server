@@ -398,6 +398,7 @@ export class MatterController {
                 this.#bleProxyEnabled,
                 !this.#disableOtaProvider,
                 this.#enableTimeSync,
+                !this.#threadDiagnosticsDisabled,
                 this.#subscriptionWatchdog,
                 this.#maxSubscriptionIntervalSeconds,
             );
