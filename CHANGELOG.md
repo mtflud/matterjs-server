@@ -7,6 +7,21 @@ This page shows a detailed overview of the changes between versions without the 
 	## **WORK IN PROGRESS**
 -->
 
+## 1.3.3-wd.1 (2026-07-29)
+
+- Rebase the fork onto upstream 1.3.3 / matter.js 0.17.7 — picks up the Thread
+  topology poller, ICD LIT deferral for periodic node work, the TimeSync DST
+  rework, Python-casing wire compatibility fixes, and the 0.17.7 subscription
+  and commissioning robustness fixes.
+- Dropped as superseded: the fork's outcome-based trigger-sync cooldown
+  (upstream 1.3.2 now answers a node reporting no usable time within a minute
+  via the timeFailure path instead of holding it to the 24h cooldown).
+- Still fork-only, carried forward: subscription-liveness watchdog
+  (`--subscription-watchdog`), requested max-interval cap
+  (`--max-subscription-interval`, default 300s), and the ACK-failure
+  fast-resubscribe dist patch regenerated for matter.js 0.17.7 (verified
+  upstream 0.17.7 has no equivalent; behavioral + canary tests green).
+
 ## 1.3.3 (2026-07-28)
 
 - Enhancement: (pkese) Dashboard network graphs space nodes by signal quality (Thread LQI, Wi-Fi RSSI) instead of using one fixed edge length
