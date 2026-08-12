@@ -7,6 +7,20 @@ This page shows a detailed overview of the changes between versions without the 
 	## **WORK IN PROGRESS**
 -->
 
+## 1.4.0-wd.1 (2026-08-12)
+
+- Rebase the fork onto upstream 1.4.0 / matter.js 0.17.9 — picks up WS schema
+  13 (network topology API, local OTA upload), manufacturer-specific attribute
+  support on standard clusters, and the matter.js 0.17.8/0.17.9 subscription
+  robustness fixes (resubscribe stops for unreachable peers, MRP-exhaustion
+  send failures abandon the subscription, peer-lost sessions skipped).
+- Still fork-only, carried forward: subscription-liveness watchdog
+  (`--subscription-watchdog`), requested max-interval cap
+  (`--max-subscription-interval`, default 300s), and the ACK-failure
+  fast-resubscribe dist patch regenerated for matter.js 0.17.9 (verified by
+  dist inspection that 0.17.9 still swallows final data-report ACK failures;
+  behavioral + canary tests green, full suite 282/282).
+
 ## 1.4.0 (2026-08-07)
 
 - Enhancement: Introduces Websocket Schema version 13 (backward compatible)
