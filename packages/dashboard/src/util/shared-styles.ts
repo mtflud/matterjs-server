@@ -34,6 +34,45 @@ export const reducedMotionStyles = css`
     }
 `;
 
+/** Bordered panel holding one or more `.info-section` blocks, each optionally listing `.chip`s. */
+export const infoPanelStyles = css`
+    .info-panel {
+        background-color: var(--md-sys-color-surface-container);
+        border: 1px solid var(--md-sys-color-outline-variant);
+        border-radius: 12px;
+        padding: 14px 16px;
+    }
+
+    .info-section + .info-section {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    .info-section-header {
+        font-weight: 500;
+        color: var(--md-sys-color-on-surface);
+        margin-bottom: 10px;
+    }
+
+    .chip-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .chip {
+        font-size: 0.85rem;
+        color: var(--md-sys-color-on-secondary-container);
+        background: var(--md-sys-color-secondary-container);
+        padding: 4px 10px;
+        border-radius: 8px;
+    }
+`;
+
 export const notFoundStyles = css`
     .not-found {
         display: flex;

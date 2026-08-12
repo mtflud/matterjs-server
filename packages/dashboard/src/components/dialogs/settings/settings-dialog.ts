@@ -311,9 +311,11 @@ export class SettingsDialog extends LitElement {
                         <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>Add
                     </md-text-button>
                 </div>
-                ${entries.length === 0 && !this._wifiAdding
-                    ? html`<p class="cred-empty">No WiFi credentials configured</p>`
-                    : nothing}
+                ${
+                    entries.length === 0 && !this._wifiAdding
+                        ? html`<p class="cred-empty">No WiFi credentials configured</p>`
+                        : nothing
+                }
                 ${entries.map(entry => this._renderWifiEntry(entry))}
                 ${this._wifiAdding ? this._renderWifiForm(undefined, "") : nothing}
             </div>
@@ -356,19 +358,21 @@ export class SettingsDialog extends LitElement {
                     >
                         <ha-svg-icon .path=${mdiPencil}></ha-svg-icon>
                     </md-icon-button>
-                    ${isDefault
-                        ? html`<md-text-button
-                              @click=${handleAsync(() => this._removeWifi("default"))}
-                              .disabled=${this._credLoading}
-                              >Clear</md-text-button
-                          >`
-                        : html`<md-icon-button
-                              title="Delete"
-                              @click=${handleAsync(() => this._removeWifi(entry.id))}
-                              .disabled=${this._credLoading}
-                          >
-                              <ha-svg-icon .path=${mdiDelete}></ha-svg-icon>
-                          </md-icon-button>`}
+                    ${
+                        isDefault
+                            ? html`<md-text-button
+                                  @click=${handleAsync(() => this._removeWifi("default"))}
+                                  .disabled=${this._credLoading}
+                                  >Clear</md-text-button
+                              >`
+                            : html`<md-icon-button
+                                  title="Delete"
+                                  @click=${handleAsync(() => this._removeWifi(entry.id))}
+                                  .disabled=${this._credLoading}
+                              >
+                                  <ha-svg-icon .path=${mdiDelete}></ha-svg-icon>
+                              </md-icon-button>`
+                    }
                 </div>
             </div>
         `;
@@ -378,14 +382,16 @@ export class SettingsDialog extends LitElement {
         const isAdd = id === undefined;
         return html`
             <div class="cred-form">
-                ${isAdd
-                    ? html`<md-outlined-text-field
-                          id="cred-wifi-id"
-                          label="Identifier"
-                          supporting-text="Unique name (not 'default' or 'delete')"
-                          .disabled=${this._credLoading}
-                      ></md-outlined-text-field>`
-                    : nothing}
+                ${
+                    isAdd
+                        ? html`<md-outlined-text-field
+                              id="cred-wifi-id"
+                              label="Identifier"
+                              supporting-text="Unique name (not 'default' or 'delete')"
+                              .disabled=${this._credLoading}
+                          ></md-outlined-text-field>`
+                        : nothing
+                }
                 <md-outlined-text-field
                     id="cred-wifi-ssid"
                     label="SSID"
@@ -433,9 +439,11 @@ export class SettingsDialog extends LitElement {
                         <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>Add
                     </md-text-button>
                 </div>
-                ${entries.length === 0 && !this._threadAdding
-                    ? html`<p class="cred-empty">No Thread datasets configured</p>`
-                    : nothing}
+                ${
+                    entries.length === 0 && !this._threadAdding
+                        ? html`<p class="cred-empty">No Thread datasets configured</p>`
+                        : nothing
+                }
                 ${entries.map(entry => this._renderThreadEntry(entry))}
                 ${this._threadAdding ? this._renderThreadForm(undefined) : nothing}
             </div>
@@ -477,19 +485,21 @@ export class SettingsDialog extends LitElement {
                     >
                         <ha-svg-icon .path=${mdiPencil}></ha-svg-icon>
                     </md-icon-button>
-                    ${isDefault
-                        ? html`<md-text-button
-                              @click=${handleAsync(() => this._removeThread("default"))}
-                              .disabled=${this._credLoading}
-                              >Clear</md-text-button
-                          >`
-                        : html`<md-icon-button
-                              title="Delete"
-                              @click=${handleAsync(() => this._removeThread(entry.id))}
-                              .disabled=${this._credLoading}
-                          >
-                              <ha-svg-icon .path=${mdiDelete}></ha-svg-icon>
-                          </md-icon-button>`}
+                    ${
+                        isDefault
+                            ? html`<md-text-button
+                                  @click=${handleAsync(() => this._removeThread("default"))}
+                                  .disabled=${this._credLoading}
+                                  >Clear</md-text-button
+                              >`
+                            : html`<md-icon-button
+                                  title="Delete"
+                                  @click=${handleAsync(() => this._removeThread(entry.id))}
+                                  .disabled=${this._credLoading}
+                              >
+                                  <ha-svg-icon .path=${mdiDelete}></ha-svg-icon>
+                              </md-icon-button>`
+                    }
                 </div>
             </div>
         `;
@@ -499,14 +509,16 @@ export class SettingsDialog extends LitElement {
         const isAdd = id === undefined;
         return html`
             <div class="cred-form">
-                ${isAdd
-                    ? html`<md-outlined-text-field
-                          id="cred-thread-id"
-                          label="Identifier"
-                          supporting-text="Unique name (not 'default' or 'delete')"
-                          .disabled=${this._credLoading}
-                      ></md-outlined-text-field>`
-                    : nothing}
+                ${
+                    isAdd
+                        ? html`<md-outlined-text-field
+                              id="cred-thread-id"
+                              label="Identifier"
+                              supporting-text="Unique name (not 'default' or 'delete')"
+                              .disabled=${this._credLoading}
+                          ></md-outlined-text-field>`
+                        : nothing
+                }
                 <md-outlined-text-field
                     id="cred-thread-dataset"
                     label="Thread dataset"
@@ -532,51 +544,59 @@ export class SettingsDialog extends LitElement {
                 <div class="cred-info">
                     <ha-svg-icon .path=${mdiWifi}></ha-svg-icon>
                     <span class="cred-label">WiFi</span>
-                    ${this.client.serverInfo.wifi_credentials_set
-                        ? html`<span class="cred-value">${this.client.serverInfo.wifi_ssid}</span>`
-                        : html`<span class="cred-unset">Not configured</span>`}
+                    ${
+                        this.client.serverInfo.wifi_credentials_set
+                            ? html`<span class="cred-value">${this.client.serverInfo.wifi_ssid}</span>`
+                            : html`<span class="cred-unset">Not configured</span>`
+                    }
                 </div>
                 <md-text-button @click=${() => this._toggleExpand("wifi")} .disabled=${this._credLoading}
                     >Edit</md-text-button
                 >
             </div>
-            ${this._expandedRow === "wifi"
-                ? html`<div class="cred-form">
-                      <md-outlined-text-field
-                          id="cred-wifi-ssid"
-                          label="SSID"
-                          .value=${this.client.serverInfo.wifi_ssid ?? ""}
-                          .disabled=${this._credLoading}
-                      ></md-outlined-text-field>
-                      <div class="password-row">
+            ${
+                this._expandedRow === "wifi"
+                    ? html`<div class="cred-form">
                           <md-outlined-text-field
-                              id="cred-wifi-password"
-                              label="Password"
-                              .type=${this._showPassword ? "text" : "password"}
+                              id="cred-wifi-ssid"
+                              label="SSID"
+                              .value=${this.client.serverInfo.wifi_ssid ?? ""}
                               .disabled=${this._credLoading}
                           ></md-outlined-text-field>
-                          <md-icon-button @click=${this._togglePassword}>
-                              <ha-svg-icon .path=${this._showPassword ? mdiEyeOff : mdiEye}></ha-svg-icon>
-                          </md-icon-button>
-                      </div>
-                      ${this._renderCredError()}
-                      <div class="form-actions">
-                          <md-text-button @click=${this._cancelCred} .disabled=${this._credLoading}
-                              >Cancel</md-text-button
-                          >
-                          ${this.client.serverInfo.wifi_credentials_set
-                              ? html`<md-text-button
-                                    @click=${handleAsync(() => this._removeWifi())}
-                                    .disabled=${this._credLoading}
-                                    >Remove</md-text-button
-                                >`
-                              : nothing}
-                          <md-filled-button @click=${handleAsync(() => this._saveWifi())} .disabled=${this._credLoading}
-                              >Save</md-filled-button
-                          >
-                      </div>
-                  </div>`
-                : nothing}
+                          <div class="password-row">
+                              <md-outlined-text-field
+                                  id="cred-wifi-password"
+                                  label="Password"
+                                  .type=${this._showPassword ? "text" : "password"}
+                                  .disabled=${this._credLoading}
+                              ></md-outlined-text-field>
+                              <md-icon-button @click=${this._togglePassword}>
+                                  <ha-svg-icon .path=${this._showPassword ? mdiEyeOff : mdiEye}></ha-svg-icon>
+                              </md-icon-button>
+                          </div>
+                          ${this._renderCredError()}
+                          <div class="form-actions">
+                              <md-text-button @click=${this._cancelCred} .disabled=${this._credLoading}
+                                  >Cancel</md-text-button
+                              >
+                              ${
+                                  this.client.serverInfo.wifi_credentials_set
+                                      ? html`<md-text-button
+                                            @click=${handleAsync(() => this._removeWifi())}
+                                            .disabled=${this._credLoading}
+                                            >Remove</md-text-button
+                                        >`
+                                      : nothing
+                              }
+                              <md-filled-button
+                                  @click=${handleAsync(() => this._saveWifi())}
+                                  .disabled=${this._credLoading}
+                                  >Save</md-filled-button
+                              >
+                          </div>
+                      </div>`
+                    : nothing
+            }
         `;
     }
 
@@ -586,42 +606,48 @@ export class SettingsDialog extends LitElement {
                 <div class="cred-info">
                     <ha-svg-icon .path=${mdiAccessPoint}></ha-svg-icon>
                     <span class="cred-label">Thread</span>
-                    ${this.client.serverInfo.thread_credentials_set
-                        ? html`<span class="cred-value">Thread network set</span>`
-                        : html`<span class="cred-unset">Not configured</span>`}
+                    ${
+                        this.client.serverInfo.thread_credentials_set
+                            ? html`<span class="cred-value">Thread network set</span>`
+                            : html`<span class="cred-unset">Not configured</span>`
+                    }
                 </div>
                 <md-text-button @click=${() => this._toggleExpand("thread")} .disabled=${this._credLoading}
                     >Edit</md-text-button
                 >
             </div>
-            ${this._expandedRow === "thread"
-                ? html`<div class="cred-form">
-                      <md-outlined-text-field
-                          id="cred-thread-dataset"
-                          label="Thread dataset"
-                          supporting-text="Hex string (e.g. 0E080000...)"
-                          .disabled=${this._credLoading}
-                      ></md-outlined-text-field>
-                      ${this._renderCredError()}
-                      <div class="form-actions">
-                          <md-text-button @click=${this._cancelCred} .disabled=${this._credLoading}
-                              >Cancel</md-text-button
-                          >
-                          ${this.client.serverInfo.thread_credentials_set
-                              ? html`<md-text-button
-                                    @click=${handleAsync(() => this._removeThread())}
-                                    .disabled=${this._credLoading}
-                                    >Remove</md-text-button
-                                >`
-                              : nothing}
-                          <md-filled-button
-                              @click=${handleAsync(() => this._saveThread())}
+            ${
+                this._expandedRow === "thread"
+                    ? html`<div class="cred-form">
+                          <md-outlined-text-field
+                              id="cred-thread-dataset"
+                              label="Thread dataset"
+                              supporting-text="Hex string (e.g. 0E080000...)"
                               .disabled=${this._credLoading}
-                              >Save</md-filled-button
-                          >
-                      </div>
-                  </div>`
-                : nothing}
+                          ></md-outlined-text-field>
+                          ${this._renderCredError()}
+                          <div class="form-actions">
+                              <md-text-button @click=${this._cancelCred} .disabled=${this._credLoading}
+                                  >Cancel</md-text-button
+                              >
+                              ${
+                                  this.client.serverInfo.thread_credentials_set
+                                      ? html`<md-text-button
+                                            @click=${handleAsync(() => this._removeThread())}
+                                            .disabled=${this._credLoading}
+                                            >Remove</md-text-button
+                                        >`
+                                      : nothing
+                              }
+                              <md-filled-button
+                                  @click=${handleAsync(() => this._saveThread())}
+                                  .disabled=${this._credLoading}
+                                  >Save</md-filled-button
+                              >
+                          </div>
+                      </div>`
+                    : nothing
+            }
         `;
     }
 

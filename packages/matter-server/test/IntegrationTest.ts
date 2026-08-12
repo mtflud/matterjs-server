@@ -14,6 +14,7 @@
 import { ServerErrorCode } from "@matter-server/ws-controller";
 import { ChildProcess } from "child_process";
 import { readFile, stat } from "node:fs/promises";
+import { request as httpRequest, type IncomingMessage } from "node:http";
 import {
     cleanupTempStorage,
     createTempStoragePaths,
@@ -136,7 +137,7 @@ describe("Integration Test", function () {
 
             expect(info).to.have.property("fabric_id");
             expect(info).to.have.property("compressed_fabric_id");
-            expect(info.schema_version).to.equal(12);
+            expect(info.schema_version).to.equal(13);
             expect(info.min_supported_schema_version).to.equal(11);
             expect(info.sdk_version).to.be.a("string").that.includes("matter-server");
             expect(info.sdk_version).to.be.a("string").that.includes("matter.js");
@@ -179,7 +180,7 @@ describe("Integration Test", function () {
             expect(diag).to.have.property("info");
             expect(diag).to.have.property("nodes");
             expect(diag).to.have.property("events");
-            expect(diag.info.schema_version).to.equal(12);
+            expect(diag.info.schema_version).to.equal(13);
             expect(diag.nodes).to.be.an("array");
             expect(diag.events).to.be.an("array");
         });
@@ -290,6 +291,78 @@ describe("Integration Test", function () {
 
                 expect(error.error_code).to.equal(ServerErrorCode.NodeNotExists);
                 expect(error.details).to.include("999999");
+            });
+
+            it("should return OtaUploadError for corrupt OTA upload data via HTTP", async function () {
+                const ticket = await client.sendCommand("initiate_ota_upload", 13, {});
+
+                const response = await fetch(`http://localhost:${SERVER_PORT}/ota-upload/${ticket.upload_id}`, {
+                    method: "POST",
+                    body: Buffer.from("not a real ota file"),
+                });
+
+                expect(response.status).to.equal(400);
+                const body = await response.json();
+                expect(body.error_code).to.equal(ServerErrorCode.OtaUploadError);
+            });
+
+            it("should reject an OTA upload id that was already used", async function () {
+                const ticket = await client.sendCommand("initiate_ota_upload", 13, {});
+                const url = `http://localhost:${SERVER_PORT}/ota-upload/${ticket.upload_id}`;
+
+                await fetch(url, { method: "POST", body: Buffer.from("not a real ota file") });
+                const replay = await fetch(url, { method: "POST", body: Buffer.from("not a real ota file") });
+
+                expect(replay.status).to.equal(400);
+                const body = await replay.json();
+                expect(body.error_code).to.equal(ServerErrorCode.OtaUploadError);
+                // The reservation is gone once the first POST finished, so the id reads as unknown
+                // rather than "already used" — that one answers a POST racing the first.
+                expect(body.message).to.include("Unknown OTA upload id");
+            });
+
+            it("should reject an OTA upload larger than the configured limit", async function () {
+                const ticket = await client.sendCommand("initiate_ota_upload", 13, {});
+
+                // The rejection lands on the declared length, so the body must stay unsent: a client
+                // still writing when the socket goes down reads a broken pipe, not the answer.
+                const request = httpRequest({
+                    host: "localhost",
+                    port: SERVER_PORT,
+                    path: `/ota-upload/${ticket.upload_id}`,
+                    method: "POST",
+                    headers: { "Content-Length": String(ticket.max_size + 1) },
+                });
+                request.on("error", () => {});
+
+                try {
+                    const response = await new Promise<IncomingMessage>((resolve, reject) => {
+                        request.on("response", resolve);
+                        request.on("error", reject);
+                        request.write("x");
+                    });
+                    response.resume();
+
+                    expect(response.statusCode).to.equal(413);
+                } finally {
+                    request.destroy();
+                }
+
+                const replay = await fetch(`http://localhost:${SERVER_PORT}/ota-upload/${ticket.upload_id}`, {
+                    method: "POST",
+                    body: Buffer.from("not a real ota file"),
+                });
+                expect(replay.status).to.equal(400);
+                expect((await replay.json()).error_code).to.equal(ServerErrorCode.OtaUploadError);
+            });
+
+            it("should reject an OTA upload POST without a valid id", async function () {
+                const response = await fetch(`http://localhost:${SERVER_PORT}/ota-upload`, {
+                    method: "POST",
+                    body: Buffer.from("not a real ota file"),
+                });
+
+                expect(response.status).to.equal(404);
             });
         });
     });
@@ -526,6 +599,31 @@ describe("Integration Test", function () {
             // Verify the write by reading back
             const attrs = await client.readAttribute(commissionedNodeId, "0/40/5");
             expect(attrs["0/40/5"]).to.equal("Integration Test Node");
+        });
+
+        it("should write struct-list attribute using tag-keyed struct members", async function () {
+            // UserLabel.LabelList (1/65/0) is a list of LabelStruct; tag 0 = label, tag 1 = value
+            const result = await client.writeAttribute(commissionedNodeId, "1/65/0", [{ "0": "room", "1": "kitchen" }]);
+
+            expect(result).to.be.an("array");
+            const writeResult = result as Array<{ Path: object; Status: number }>;
+            expect(writeResult[0].Status).to.equal(0); // Success
+
+            const attrs = await client.readAttribute(commissionedNodeId, "1/65/0");
+            expect(attrs["1/65/0"]).to.deep.equal([{ "0": "room", "1": "kitchen" }]);
+        });
+
+        it("should write struct-list attribute using name-keyed struct members", async function () {
+            const result = await client.writeAttribute(commissionedNodeId, "1/65/0", [
+                { label: "room", value: "office" },
+            ]);
+
+            expect(result).to.be.an("array");
+            const writeResult = result as Array<{ Path: object; Status: number }>;
+            expect(writeResult[0].Status).to.equal(0); // Success
+
+            const attrs = await client.readAttribute(commissionedNodeId, "1/65/0");
+            expect(attrs["1/65/0"]).to.deep.equal([{ "0": "room", "1": "office" }]);
         });
 
         it("should reject when writing a read-only attribute", async function () {

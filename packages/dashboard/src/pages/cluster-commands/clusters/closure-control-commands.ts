@@ -92,29 +92,35 @@ class ClosureControlClusterCommands extends BaseClusterCommands {
                 <div class="command-content">
                     <div class="top-row">
                         <span class="state-badge ${mainState === MAIN_STATE_ERROR ? "error" : ""}">
-                            ${mainState !== null
-                                ? (MAIN_STATE_LABELS[mainState] ?? `Unknown (${mainState})`)
-                                : "Unknown"}
+                            ${
+                                mainState !== null
+                                    ? (MAIN_STATE_LABELS[mainState] ?? `Unknown (${mainState})`)
+                                    : "Unknown"
+                            }
                         </span>
-                        ${countdownTime !== null
-                            ? html`<span class="muted">~${countdownTime}s remaining</span>`
-                            : nothing}
+                        ${
+                            countdownTime !== null
+                                ? html`<span class="muted">~${countdownTime}s remaining</span>`
+                                : nothing
+                        }
                     </div>
 
-                    ${errors.length > 0
-                        ? html`
-                              <div class="errors">
-                                  ${errors.map(
-                                      e => html`
-                                          <span class="error-chip">
-                                              <ha-svg-icon .path=${mdiAlertCircle}></ha-svg-icon>
-                                              ${CLOSURE_ERROR_LABELS[e] ?? `Error ${e}`}
-                                          </span>
-                                      `,
-                                  )}
-                              </div>
-                          `
-                        : nothing}
+                    ${
+                        errors.length > 0
+                            ? html`
+                                  <div class="errors">
+                                      ${errors.map(
+                                          e => html`
+                                              <span class="error-chip">
+                                                  <ha-svg-icon .path=${mdiAlertCircle}></ha-svg-icon>
+                                                  ${CLOSURE_ERROR_LABELS[e] ?? `Error ${e}`}
+                                              </span>
+                                          `,
+                                      )}
+                                  </div>
+                              `
+                            : nothing
+                    }
 
                     <div class="states-grid">
                         <div class="state-block">
@@ -128,103 +134,117 @@ class ClosureControlClusterCommands extends BaseClusterCommands {
                     </div>
 
                     <div class="actions">
-                        ${!features.instantaneous
-                            ? html`<md-outlined-button @click=${handleAsync(() => this._handleStop())}>
-                                  <ha-svg-icon slot="icon" .path=${mdiStop}></ha-svg-icon>
-                                  Stop
-                              </md-outlined-button>`
-                            : nothing}
-                        ${features.calibration
-                            ? html`<md-outlined-button @click=${handleAsync(() => this._handleCalibrate())}>
-                                  <ha-svg-icon slot="icon" .path=${mdiCogRefresh}></ha-svg-icon>
-                                  Calibrate
-                              </md-outlined-button>`
-                            : nothing}
+                        ${
+                            !features.instantaneous
+                                ? html`<md-outlined-button @click=${handleAsync(() => this._handleStop())}>
+                                      <ha-svg-icon slot="icon" .path=${mdiStop}></ha-svg-icon>
+                                      Stop
+                                  </md-outlined-button>`
+                                : nothing
+                        }
+                        ${
+                            features.calibration
+                                ? html`<md-outlined-button @click=${handleAsync(() => this._handleCalibrate())}>
+                                      <ha-svg-icon slot="icon" .path=${mdiCogRefresh}></ha-svg-icon>
+                                      Calibrate
+                                  </md-outlined-button>`
+                                : nothing
+                        }
                     </div>
 
                     <div class="move-to">
                         <div class="move-to-header">Move to</div>
                         <div class="move-to-controls">
-                            ${features.positioning
-                                ? html`
-                                      <md-outlined-select
-                                          label="Position"
-                                          .value=${this._moveToPosition}
-                                          @change=${(e: Event) => {
-                                              this._moveToPosition = (e.target as HTMLSelectElement).value;
-                                          }}
-                                      >
-                                          <md-select-option value="">
-                                              <div slot="headline">(unchanged)</div>
-                                          </md-select-option>
-                                          ${Object.entries(TARGET_POSITION_LABELS)
-                                              .filter(
-                                                  ([id]) =>
-                                                      (id !== "2" || features.pedestrian) &&
-                                                      (id !== "3" || features.ventilation),
-                                              )
-                                              .map(
+                            ${
+                                features.positioning
+                                    ? html`
+                                          <md-outlined-select
+                                              label="Position"
+                                              .value=${this._moveToPosition}
+                                              @change=${(e: Event) => {
+                                                  this._moveToPosition = (e.target as HTMLSelectElement).value;
+                                              }}
+                                          >
+                                              <md-select-option value="">
+                                                  <div slot="headline">(unchanged)</div>
+                                              </md-select-option>
+                                              ${Object.entries(TARGET_POSITION_LABELS)
+                                                  .filter(
+                                                      ([id]) =>
+                                                          (id !== "2" || features.pedestrian) &&
+                                                          (id !== "3" || features.ventilation),
+                                                  )
+                                                  .map(
+                                                      ([id, label]) => html`
+                                                          <md-select-option value=${id}>
+                                                              <div slot="headline">${label}</div>
+                                                          </md-select-option>
+                                                      `,
+                                                  )}
+                                          </md-outlined-select>
+                                      `
+                                    : nothing
+                            }
+                            ${
+                                features.motionLatching &&
+                                (latchControlModes.remoteLatching || latchControlModes.remoteUnlatching)
+                                    ? html`
+                                          <md-outlined-select
+                                              label="Latch"
+                                              .value=${this._moveToLatch}
+                                              @change=${(e: Event) => {
+                                                  this._moveToLatch = (e.target as HTMLSelectElement).value;
+                                              }}
+                                          >
+                                              <md-select-option value="">
+                                                  <div slot="headline">(unchanged)</div>
+                                              </md-select-option>
+                                              ${
+                                                  latchControlModes.remoteLatching
+                                                      ? html`<md-select-option value="true">
+                                                            <div slot="headline">Latch</div>
+                                                        </md-select-option>`
+                                                      : nothing
+                                              }
+                                              ${
+                                                  latchControlModes.remoteUnlatching
+                                                      ? html`<md-select-option value="false">
+                                                            <div slot="headline">Unlatch</div>
+                                                        </md-select-option>`
+                                                      : nothing
+                                              }
+                                          </md-outlined-select>
+                                      `
+                                    : nothing
+                            }
+                            ${
+                                features.speed
+                                    ? html`
+                                          <md-outlined-select
+                                              label="Speed"
+                                              .value=${this._moveToSpeed}
+                                              @change=${(e: Event) => {
+                                                  this._moveToSpeed = (e.target as HTMLSelectElement).value;
+                                              }}
+                                          >
+                                              <md-select-option value="">
+                                                  <div slot="headline">(unchanged)</div>
+                                              </md-select-option>
+                                              ${Object.entries(SPEED_LABELS).map(
                                                   ([id, label]) => html`
                                                       <md-select-option value=${id}>
                                                           <div slot="headline">${label}</div>
                                                       </md-select-option>
                                                   `,
                                               )}
-                                      </md-outlined-select>
-                                  `
-                                : nothing}
-                            ${features.motionLatching &&
-                            (latchControlModes.remoteLatching || latchControlModes.remoteUnlatching)
-                                ? html`
-                                      <md-outlined-select
-                                          label="Latch"
-                                          .value=${this._moveToLatch}
-                                          @change=${(e: Event) => {
-                                              this._moveToLatch = (e.target as HTMLSelectElement).value;
-                                          }}
-                                      >
-                                          <md-select-option value="">
-                                              <div slot="headline">(unchanged)</div>
-                                          </md-select-option>
-                                          ${latchControlModes.remoteLatching
-                                              ? html`<md-select-option value="true">
-                                                    <div slot="headline">Latch</div>
-                                                </md-select-option>`
-                                              : nothing}
-                                          ${latchControlModes.remoteUnlatching
-                                              ? html`<md-select-option value="false">
-                                                    <div slot="headline">Unlatch</div>
-                                                </md-select-option>`
-                                              : nothing}
-                                      </md-outlined-select>
-                                  `
-                                : nothing}
-                            ${features.speed
-                                ? html`
-                                      <md-outlined-select
-                                          label="Speed"
-                                          .value=${this._moveToSpeed}
-                                          @change=${(e: Event) => {
-                                              this._moveToSpeed = (e.target as HTMLSelectElement).value;
-                                          }}
-                                      >
-                                          <md-select-option value="">
-                                              <div slot="headline">(unchanged)</div>
-                                          </md-select-option>
-                                          ${Object.entries(SPEED_LABELS).map(
-                                              ([id, label]) => html`
-                                                  <md-select-option value=${id}>
-                                                      <div slot="headline">${label}</div>
-                                                  </md-select-option>
-                                              `,
-                                          )}
-                                      </md-outlined-select>
-                                  `
-                                : nothing}
+                                          </md-outlined-select>
+                                      `
+                                    : nothing
+                            }
                             <md-filled-button
-                                ?disabled=${this._moveToPosition === "" &&
-                                this._moveToLatch === "" &&
-                                this._moveToSpeed === ""}
+                                ?disabled=${
+                                    this._moveToPosition === "" && this._moveToLatch === "" && this._moveToSpeed === ""
+                                }
                                 @click=${handleAsync(() => this._handleMoveTo())}
                             >
                                 Move
@@ -241,40 +261,52 @@ class ClosureControlClusterCommands extends BaseClusterCommands {
         const positionLabels = "secureState" in state ? CURRENT_POSITION_LABELS : TARGET_POSITION_LABELS;
         return html`
             <div class="state-fields">
-                ${features.positioning
-                    ? html`<div class="state-field">
-                          <span class="muted">Position:</span>
-                          <span>
-                              ${state.position !== null
-                                  ? (positionLabels[state.position] ?? `#${state.position}`)
-                                  : "Unknown"}
-                          </span>
-                      </div>`
-                    : nothing}
-                ${features.motionLatching
-                    ? html`<div class="state-field">
-                          <span class="muted">Latch:</span>
-                          <span>${state.latch === null ? "Unknown" : state.latch ? "Latched" : "Unlatched"}</span>
-                      </div>`
-                    : nothing}
-                ${features.speed
-                    ? html`<div class="state-field">
-                          <span class="muted">Speed:</span>
-                          <span
-                              >${state.speed !== null
-                                  ? (SPEED_LABELS[state.speed] ?? `#${state.speed}`)
-                                  : "Unknown"}</span
-                          >
-                      </div>`
-                    : nothing}
-                ${"secureState" in state
-                    ? html`<div class="state-field">
-                          <span class="muted">Secure:</span>
-                          <span>
-                              ${state.secureState === null ? "Unknown" : state.secureState ? "Secure" : "Not secure"}
-                          </span>
-                      </div>`
-                    : nothing}
+                ${
+                    features.positioning
+                        ? html`<div class="state-field">
+                              <span class="muted">Position:</span>
+                              <span>
+                                  ${
+                                      state.position !== null
+                                          ? (positionLabels[state.position] ?? `#${state.position}`)
+                                          : "Unknown"
+                                  }
+                              </span>
+                          </div>`
+                        : nothing
+                }
+                ${
+                    features.motionLatching
+                        ? html`<div class="state-field">
+                              <span class="muted">Latch:</span>
+                              <span>${state.latch === null ? "Unknown" : state.latch ? "Latched" : "Unlatched"}</span>
+                          </div>`
+                        : nothing
+                }
+                ${
+                    features.speed
+                        ? html`<div class="state-field">
+                              <span class="muted">Speed:</span>
+                              <span
+                                  >${
+                                      state.speed !== null
+                                          ? (SPEED_LABELS[state.speed] ?? `#${state.speed}`)
+                                          : "Unknown"
+                                  }</span
+                              >
+                          </div>`
+                        : nothing
+                }
+                ${
+                    "secureState" in state
+                        ? html`<div class="state-field">
+                              <span class="muted">Secure:</span>
+                              <span>
+                                  ${state.secureState === null ? "Unknown" : state.secureState ? "Secure" : "Not secure"}
+                              </span>
+                          </div>`
+                        : nothing
+                }
             </div>
         `;
     }

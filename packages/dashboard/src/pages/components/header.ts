@@ -129,22 +129,26 @@ export class DashboardHeader extends LitElement {
                     aria-current=${this.activeView === "nodes" ? "page" : nothing}
                     >Nodes</a
                 >
-                ${showThreadTab
-                    ? html`<a
-                          href="#thread"
-                          class="nav-tab ${this.activeView === "thread" ? "active" : ""}"
-                          aria-current=${this.activeView === "thread" ? "page" : nothing}
-                          >Thread</a
-                      >`
-                    : nothing}
-                ${showWifiTab
-                    ? html`<a
-                          href="#wifi"
-                          class="nav-tab ${this.activeView === "wifi" ? "active" : ""}"
-                          aria-current=${this.activeView === "wifi" ? "page" : nothing}
-                          >WiFi</a
-                      >`
-                    : nothing}
+                ${
+                    showThreadTab
+                        ? html`<a
+                              href="#thread"
+                              class="nav-tab ${this.activeView === "thread" ? "active" : ""}"
+                              aria-current=${this.activeView === "thread" ? "page" : nothing}
+                              >Thread</a
+                          >`
+                        : nothing
+                }
+                ${
+                    showWifiTab
+                        ? html`<a
+                              href="#wifi"
+                              class="nav-tab ${this.activeView === "wifi" ? "active" : ""}"
+                              aria-current=${this.activeView === "wifi" ? "page" : nothing}
+                              >WiFi</a
+                          >`
+                        : nothing
+                }
             </nav>
         `;
     }
@@ -153,14 +157,16 @@ export class DashboardHeader extends LitElement {
         return html`
             <div class="header">
                 <!-- optional back button -->
-                ${this.backButton
-                    ? html` <md-icon-button title="Back" aria-label="Back" @click=${this._goBack}>
-                              <ha-svg-icon .path=${mdiArrowLeft}></ha-svg-icon>
-                          </md-icon-button>
-                          <md-icon-button title="Home" aria-label="Home" @click=${this._goHome}>
-                              <ha-svg-icon .path=${mdiHome}></ha-svg-icon>
-                          </md-icon-button>`
-                    : ""}
+                ${
+                    this.backButton
+                        ? html` <md-icon-button title="Back" aria-label="Back" @click=${this._goBack}>
+                                  <ha-svg-icon .path=${mdiArrowLeft}></ha-svg-icon>
+                              </md-icon-button>
+                              <md-icon-button title="Home" aria-label="Home" @click=${this._goHome}>
+                                  <ha-svg-icon .path=${mdiHome}></ha-svg-icon>
+                              </md-icon-button>`
+                        : ""
+                }
 
                 <div class="title">${this.title ?? ""}</div>
                 ${this._renderNavTabs()}
@@ -173,38 +179,44 @@ export class DashboardHeader extends LitElement {
                         `;
                     })}
                     <!-- dev-mode badge (only when dev mode is active and a client exists) -->
-                    ${this._devMode && this.client
-                        ? html`
-                              <button
-                                  class="dev-badge"
-                                  @click=${this._openSettings}
-                                  title="Developer mode active — click to open settings"
-                                  aria-label="Developer mode active — click to open settings"
-                              >
-                                  DEV
-                              </button>
-                          `
-                        : nothing}
+                    ${
+                        this._devMode && this.client
+                            ? html`
+                                  <button
+                                      class="dev-badge"
+                                      @click=${this._openSettings}
+                                      title="Developer mode active — click to open settings"
+                                      aria-label="Developer mode active — click to open settings"
+                                  >
+                                      DEV
+                                  </button>
+                              `
+                            : nothing
+                    }
                     <!-- settings button (only when connected) -->
-                    ${this.client
-                        ? html`
-                              <md-icon-button @click=${this._openSettings} title="Settings">
-                                  <ha-svg-icon .path=${mdiCog}></ha-svg-icon>
-                              </md-icon-button>
-                          `
-                        : nothing}
+                    ${
+                        this.client
+                            ? html`
+                                  <md-icon-button @click=${this._openSettings} title="Settings">
+                                      <ha-svg-icon .path=${mdiCog}></ha-svg-icon>
+                                  </md-icon-button>
+                              `
+                            : nothing
+                    }
                     <!-- theme toggle button -->
                     <md-icon-button @click=${this._cycleTheme} .title=${this._getThemeTooltip()}>
                         <ha-svg-icon .path=${this._getThemeIcon()}></ha-svg-icon>
                     </md-icon-button>
                     <!-- optional logout button (only when client exists and not in production) -->
-                    ${this.client && !this.client.isProduction
-                        ? html`
-                              <md-icon-button @click=${this.client.disconnect}>
-                                  <ha-svg-icon .path=${mdiLogout}></ha-svg-icon>
-                              </md-icon-button>
-                          `
-                        : nothing}
+                    ${
+                        this.client && !this.client.isProduction
+                            ? html`
+                                  <md-icon-button @click=${this.client.disconnect}>
+                                      <ha-svg-icon .path=${mdiLogout}></ha-svg-icon>
+                                  </md-icon-button>
+                              `
+                            : nothing
+                    }
                 </div>
             </div>
         `;

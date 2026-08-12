@@ -448,13 +448,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 3,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 3,
@@ -517,13 +510,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 4,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -645,13 +631,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 6,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -847,13 +826,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 8,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 8,
@@ -1010,13 +982,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 29,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 29,
@@ -1072,13 +1037,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 30,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -1179,13 +1137,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 31,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 31,
@@ -1272,13 +1223,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 37,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -1564,13 +1508,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 40,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 40,
@@ -1613,13 +1550,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 41,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -1711,13 +1641,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 42,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 42,
@@ -1781,13 +1704,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 43,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -1853,13 +1769,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 44,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 44,
@@ -1923,13 +1832,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 45,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 45,
@@ -1985,13 +1887,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 46,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -2260,13 +2155,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 47,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 47,
@@ -2421,13 +2309,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 48,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -2585,13 +2466,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 49,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 49,
@@ -2687,13 +2561,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 50,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -2822,13 +2689,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 51,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 51,
@@ -2924,13 +2784,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 52,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -3443,13 +3296,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 53,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 53,
@@ -3612,13 +3458,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 54,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 54,
@@ -3742,13 +3581,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 55,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -3901,13 +3733,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 56,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -4172,13 +3997,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 57,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 57,
@@ -4210,8 +4028,8 @@ export const clusters: Record<number, ClusterDescription> = {
             }
         },
         "features": {
-            "0": {
-                "bit": 0,
+            "20": {
+                "bit": 20,
                 "code": "BIS",
                 "label": "Bridged Icd Support"
             }
@@ -4255,13 +4073,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 59,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -4357,13 +4168,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 60,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -4474,13 +4278,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 62,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -4621,13 +4418,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 63,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 63,
@@ -4714,13 +4504,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 64,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 64,
@@ -4771,13 +4554,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 65,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 65,
@@ -4827,13 +4603,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 69,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -4953,13 +4722,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 70,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -5086,13 +4848,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 72,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 72,
@@ -5189,13 +4944,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 73,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 73,
@@ -5265,13 +5013,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 74,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -5358,13 +5099,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 80,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 80,
@@ -5448,13 +5182,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 81,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -5540,13 +5267,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 82,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 82,
@@ -5631,13 +5351,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 83,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 83,
@@ -5720,13 +5433,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 84,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 84,
@@ -5763,8 +5469,8 @@ export const clusters: Record<number, ClusterDescription> = {
                 "code": "DEPONOFF",
                 "label": "On Off"
             },
-            "1": {
-                "bit": 1,
+            "20": {
+                "bit": 20,
                 "code": "DIRECTMODECH",
                 "label": "Direct Mode Change"
             }
@@ -5816,13 +5522,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 85,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 85,
@@ -5859,8 +5558,8 @@ export const clusters: Record<number, ClusterDescription> = {
                 "code": "DEPONOFF",
                 "label": "On Off"
             },
-            "1": {
-                "bit": 1,
+            "20": {
+                "bit": 20,
                 "code": "DIRECTMODECH",
                 "label": "Direct Mode Change"
             }
@@ -5925,13 +5624,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 86,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -6027,13 +5719,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 87,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 87,
@@ -6124,13 +5809,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 89,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 89,
@@ -6193,13 +5871,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 91,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -6363,13 +6034,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 92,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 92,
@@ -6458,13 +6122,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 93,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -6555,13 +6212,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 94,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -6682,13 +6332,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 95,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 95,
@@ -6803,13 +6446,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 96,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 96,
@@ -6920,13 +6556,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 97,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 97,
@@ -7021,13 +6650,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 98,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -7197,13 +6819,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 100,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 100,
@@ -7252,48 +6867,53 @@ export const clusters: Record<number, ClusterDescription> = {
                 "code": "RESET",
                 "label": "Reset"
             },
-            "1": {
-                "bit": 1,
+            "20": {
+                "bit": 20,
+                "code": "OVER",
+                "label": "Over Temperature"
+            },
+            "21": {
+                "bit": 21,
                 "code": "UNDER",
                 "label": "Under Temperature"
             },
-            "2": {
-                "bit": 2,
+            "22": {
+                "bit": 22,
                 "code": "MAJOR",
                 "label": "Major Threshold"
             },
-            "3": {
-                "bit": 3,
+            "23": {
+                "bit": 23,
                 "code": "MINOR",
                 "label": "Minor Threshold"
             },
-            "4": {
-                "bit": 4,
+            "24": {
+                "bit": 24,
                 "code": "OCRIADJ",
                 "label": "Over Critical Adjustable"
             },
-            "5": {
-                "bit": 5,
+            "25": {
+                "bit": 25,
                 "code": "OMAJADJ",
                 "label": "Over Major Adjustable"
             },
-            "6": {
-                "bit": 6,
+            "26": {
+                "bit": 26,
                 "code": "OMINADJ",
                 "label": "Over Minor Adjustable"
             },
-            "7": {
-                "bit": 7,
+            "27": {
+                "bit": 27,
                 "code": "UMINADJ",
                 "label": "Under Minor Adjustable"
             },
-            "8": {
-                "bit": 8,
+            "28": {
+                "bit": 28,
                 "code": "UMAJADJ",
                 "label": "Under Major Adjustable"
             },
-            "9": {
-                "bit": 9,
+            "29": {
+                "bit": 29,
                 "code": "UCRIADJ",
                 "label": "Under Critical Adjustable"
             }
@@ -7351,13 +6971,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 101,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -7491,13 +7104,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 113,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 113,
@@ -7606,13 +7212,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 114,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 114,
@@ -7720,13 +7319,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 121,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -7849,13 +7441,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 128,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -8015,13 +7600,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 129,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -8223,13 +7801,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 144,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 144,
@@ -8340,13 +7911,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 145,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -8464,13 +8028,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 148,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 148,
@@ -8566,13 +8123,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 149,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 149,
@@ -8648,13 +8198,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 151,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -8788,13 +8331,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 152,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -9085,13 +8621,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 153,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 153,
@@ -9239,13 +8768,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 155,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 155,
@@ -9313,13 +8835,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 156,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -9413,13 +8928,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 157,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 157,
@@ -9503,13 +9011,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 158,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -9595,13 +9096,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 159,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 159,
@@ -9678,13 +9172,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 160,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -10057,13 +9544,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 257,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 257,
@@ -10236,53 +9716,53 @@ export const clusters: Record<number, ClusterDescription> = {
                 "code": "FGP",
                 "label": "Finger Credentials"
             },
-            "3": {
-                "bit": 3,
+            "4": {
+                "bit": 4,
                 "code": "WDSCH",
                 "label": "Week Day Access Schedules"
             },
-            "4": {
-                "bit": 4,
+            "5": {
+                "bit": 5,
                 "code": "DPS",
                 "label": "Door Position Sensor"
             },
-            "5": {
-                "bit": 5,
+            "6": {
+                "bit": 6,
                 "code": "FACE",
                 "label": "Face Credentials"
             },
-            "6": {
-                "bit": 6,
+            "7": {
+                "bit": 7,
                 "code": "COTA",
                 "label": "Credential Over The Air Access"
             },
-            "7": {
-                "bit": 7,
+            "8": {
+                "bit": 8,
                 "code": "USR",
                 "label": "User"
             },
-            "8": {
-                "bit": 8,
+            "10": {
+                "bit": 10,
                 "code": "YDSCH",
                 "label": "Year Day Access Schedules"
             },
-            "9": {
-                "bit": 9,
+            "11": {
+                "bit": 11,
                 "code": "HDSCH",
                 "label": "Holiday Schedules"
             },
-            "10": {
-                "bit": 10,
+            "12": {
+                "bit": 12,
                 "code": "UBOLT",
                 "label": "Unbolting"
             },
-            "11": {
-                "bit": 11,
+            "13": {
+                "bit": 13,
                 "code": "ALIRO",
                 "label": "Aliro Provisioning"
             },
-            "12": {
-                "bit": 12,
+            "14": {
+                "bit": 14,
                 "code": "ALBU",
                 "label": "Aliro Bleuwb"
             }
@@ -10404,13 +9884,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 258,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 258,
@@ -10431,6 +9904,27 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "ClusterRevision",
                 "type": "ClusterRevision",
                 "writable": false
+            },
+            "355729409": {
+                "id": 355729409,
+                "cluster_id": 258,
+                "label": "WagoTravelTimeUp",
+                "type": "Optional[uint32]",
+                "writable": true
+            },
+            "355729410": {
+                "id": 355729410,
+                "cluster_id": 258,
+                "label": "WagoTravelTimeDown",
+                "type": "Optional[uint32]",
+                "writable": true
+            },
+            "355729411": {
+                "id": 355729411,
+                "cluster_id": 258,
+                "label": "WagoSlatRotationTime",
+                "type": "Optional[uint32]",
+                "writable": true
             }
         },
         "commands": {
@@ -10481,8 +9975,8 @@ export const clusters: Record<number, ClusterDescription> = {
                 "code": "PA_LF",
                 "label": "Position Aware Lift"
             },
-            "3": {
-                "bit": 3,
+            "4": {
+                "bit": 4,
                 "code": "PA_TL",
                 "label": "Position Aware Tilt"
             }
@@ -10547,13 +10041,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 260,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -10747,13 +10234,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 261,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 261,
@@ -10892,13 +10372,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 336,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -11139,13 +10612,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 512,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -11653,13 +11119,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 513,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 513,
@@ -11736,38 +11195,38 @@ export const clusters: Record<number, ClusterDescription> = {
                 "code": "OCC",
                 "label": "Occupancy"
             },
-            "3": {
-                "bit": 3,
+            "4": {
+                "bit": 4,
                 "code": "SB",
                 "label": "Setback"
             },
-            "4": {
-                "bit": 4,
+            "5": {
+                "bit": 5,
                 "code": "AUTO",
                 "label": "Auto Mode"
             },
-            "5": {
-                "bit": 5,
+            "6": {
+                "bit": 6,
                 "code": "LTNE",
                 "label": "Local Temperature Not Exposed"
             },
-            "6": {
-                "bit": 6,
+            "7": {
+                "bit": 7,
                 "code": "MSCH",
                 "label": "Matter Schedule Configuration"
             },
-            "7": {
-                "bit": 7,
+            "8": {
+                "bit": 8,
                 "code": "PRES",
                 "label": "Presets"
             },
-            "8": {
-                "bit": 8,
+            "9": {
+                "bit": 9,
                 "code": "TEVT",
                 "label": "Events"
             },
-            "9": {
-                "bit": 9,
+            "10": {
+                "bit": 10,
                 "code": "TSUGGEST",
                 "label": "Thermostat Suggestions"
             }
@@ -11875,13 +11334,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 514,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 514,
@@ -11983,13 +11435,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 516,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -12398,13 +11843,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 768,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 768,
@@ -12624,13 +12062,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1024,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1024,
@@ -12701,13 +12132,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1026,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -12815,13 +12239,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1027,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1027,
@@ -12899,13 +12316,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1028,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1028,
@@ -12976,13 +12386,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1029,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -13125,13 +12528,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1030,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1030,
@@ -13196,8 +12592,8 @@ export const clusters: Record<number, ClusterDescription> = {
                 "code": "VIS",
                 "label": "Vision"
             },
-            "8": {
-                "bit": 8,
+            "9": {
+                "bit": 9,
                 "code": "OCCEVENT",
                 "label": "Occupancy Event"
             }
@@ -13297,13 +12693,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1036,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -13456,13 +12845,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1037,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1037,
@@ -13613,13 +12995,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1043,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -13772,13 +13147,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1045,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1045,
@@ -13929,13 +13297,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1066,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -14088,13 +13449,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1067,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1067,
@@ -14245,13 +13599,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1068,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -14404,13 +13751,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1069,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1069,
@@ -14561,13 +13901,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1070,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -14720,13 +14053,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1071,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1071,
@@ -14814,13 +14140,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1072,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -14949,13 +14268,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1073,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1073,
@@ -15038,13 +14350,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1105,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -15137,13 +14442,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1106,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -15240,13 +14538,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1107,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1107,
@@ -15323,13 +14614,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1283,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1283,
@@ -15393,13 +14677,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1284,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -15515,13 +14792,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1285,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -15649,13 +14919,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1286,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -15825,13 +15088,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1287,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1287,
@@ -15906,13 +15162,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1288,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1288,
@@ -15962,13 +15211,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1289,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -16049,13 +15291,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1290,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -16153,13 +15388,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1291,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1291,
@@ -16235,13 +15463,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1292,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -16367,13 +15588,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1293,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1293,
@@ -16416,13 +15630,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1294,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -16562,13 +15769,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1295,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -16751,13 +15951,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1296,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1296,
@@ -16856,13 +16049,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1360,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -17253,13 +16439,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1361,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1361,
@@ -17490,13 +16669,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1362,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1362,
@@ -17616,13 +16788,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1363,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1363,
@@ -17710,13 +16875,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1364,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1364,
@@ -17798,13 +16956,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1365,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -17917,13 +17068,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1366,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -18108,13 +17252,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1792,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1792,
@@ -18216,13 +17353,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1872,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1872,
@@ -18272,13 +17402,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1873,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -18433,13 +17556,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1874,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -18612,13 +17728,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 1875,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 1875,
@@ -18726,13 +17835,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 2049,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -18845,13 +17947,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 2050,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -18978,13 +18073,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 2820,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 2820,
@@ -19063,13 +18151,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 2822,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 2822,
@@ -19146,13 +18227,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 2823,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -19246,13 +18320,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 302775297,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 302775297,
@@ -19302,13 +18369,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 305134641,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -19373,13 +18433,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 308149265,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -19451,13 +18504,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "label": "AcceptedCommandList",
                 "type": "List[command-id]",
                 "writable": false
-            },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 319486977,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
             },
             "65531": {
                 "id": 65531,
@@ -19677,13 +18723,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 319683586,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 319683586,
@@ -19776,13 +18815,6 @@ export const clusters: Record<number, ClusterDescription> = {
                 "type": "List[command-id]",
                 "writable": false
             },
-            "65530": {
-                "id": 65530,
-                "cluster_id": 322239491,
-                "label": "EventList",
-                "type": "Optional[unknown]",
-                "writable": true
-            },
             "65531": {
                 "id": 65531,
                 "cluster_id": 322239491,
@@ -19800,6 +18832,63 @@ export const clusters: Record<number, ClusterDescription> = {
             "65533": {
                 "id": 65533,
                 "cluster_id": 322239491,
+                "label": "ClusterRevision",
+                "type": "uint16",
+                "writable": false
+            }
+        },
+        "commands": {},
+        "features": {}
+    },
+    "355793920": {
+        "id": 355793920,
+        "label": "WagoCluster",
+        "attributes": {
+            "0": {
+                "id": 0,
+                "cluster_id": 355793920,
+                "label": "DirectlyConnected",
+                "type": "Optional[bool]",
+                "writable": true
+            },
+            "1": {
+                "id": 1,
+                "cluster_id": 355793920,
+                "label": "SwitchType",
+                "type": "Optional[unknown]",
+                "writable": true
+            },
+            "65528": {
+                "id": 65528,
+                "cluster_id": 355793920,
+                "label": "GeneratedCommandList",
+                "type": "List[command-id]",
+                "writable": false
+            },
+            "65529": {
+                "id": 65529,
+                "cluster_id": 355793920,
+                "label": "AcceptedCommandList",
+                "type": "List[command-id]",
+                "writable": false
+            },
+            "65531": {
+                "id": 65531,
+                "cluster_id": 355793920,
+                "label": "AttributeList",
+                "type": "List[attrib-id]",
+                "writable": false
+            },
+            "65532": {
+                "id": 65532,
+                "cluster_id": 355793920,
+                "label": "FeatureMap",
+                "type": "map32",
+                "writable": false
+            },
+            "65533": {
+                "id": 65533,
+                "cluster_id": 355793920,
                 "label": "ClusterRevision",
                 "type": "uint16",
                 "writable": false

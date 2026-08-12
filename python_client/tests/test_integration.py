@@ -21,7 +21,9 @@ import aiohttp
 import pytest
 import pytest_asyncio
 
-from matter_server.common.models import APICommand, EventType
+from matter_server.common.errors import OtaUploadError
+from matter_server.common.helpers.util import dataclass_from_dict
+from matter_server.common.models import APICommand, EventType, OtaUploadTicket
 
 if TYPE_CHECKING:
     from chip.clusters import Objects as Clusters
@@ -162,7 +164,7 @@ class TestServerCommands:
 
         assert "fabric_id" in info
         assert "compressed_fabric_id" in info
-        assert info["schema_version"] == 12
+        assert info["schema_version"] == 13
         assert info["min_supported_schema_version"] == 11
         assert "matter-server" in info["sdk_version"]
         assert "matter.js" in info["sdk_version"]
@@ -207,7 +209,7 @@ class TestServerCommands:
         client: MatterTestClient = env["client"]
         diag = await client.get_diagnostics()
         assert diag.info is not None
-        assert diag.info.schema_version == 12
+        assert diag.info.schema_version == 13
         assert isinstance(diag.nodes, list)
         assert isinstance(diag.events, list)
 
@@ -317,6 +319,38 @@ class TestServerCommands:
         )
         assert error["error_code"] == 5  # NodeNotExists
         assert "999999" in error["details"]
+
+    async def test_17c_ota_upload_rejects_a_corrupt_image(self, env):
+        """upload_ota_file reaches the HTTP endpoint and maps its error code.
+
+        Exercises the URL derived from the WebSocket URL against the real server.
+        """
+        client: MatterTestClient = env["client"]
+        with pytest.raises(OtaUploadError):
+            await client.upload_ota_file(b"not a real ota file")
+
+    async def test_17d_ota_upload_id_is_single_use(self, env):
+        """A reserved id cannot be spent twice."""
+        client: MatterTestClient = env["client"]
+        ticket = dataclass_from_dict(
+            OtaUploadTicket,
+            await client.send_command(APICommand.INITIATE_OTA_UPLOAD, require_schema=13),
+        )
+
+        first = await client.connection.post_ota_upload(
+            ticket.upload_id, b"not a real ota file"
+        )
+        replay = await client.connection.post_ota_upload(
+            ticket.upload_id, b"not a real ota file"
+        )
+
+        assert first[0] == 400
+        assert replay[0] == 400
+        assert replay[1] is not None
+        assert replay[1]["error_code"] == 101  # OtaUploadError
+        # The reservation is gone once the first POST finished, so the id is unknown rather
+        # than "already used" -- the latter answers a second POST racing the first.
+        assert "Unknown OTA upload id" in replay[1]["message"]
 
 
 # ============================================================================
@@ -547,6 +581,24 @@ class TestAttributeOperations:
         # Read back
         attrs = await client.read_attribute(env["node_id"], "0/40/5")
         assert attrs["0/40/5"] == "Integration Test Node"
+
+    async def test_32a_write_struct_list_attribute(self, env):
+        """Write UserLabel.LabelList with a real CHIP struct and verify."""
+        from chip.clusters import Objects as Clusters
+
+        _require_state(env, "node_id")
+        client: MatterTestClient = env["client"]
+        result = await client.write_attribute(
+            env["node_id"],
+            "1/65/0",
+            [Clusters.UserLabel.Structs.LabelStruct(label="room", value="den")],
+        )
+        assert isinstance(result, list)
+        assert result[0]["Status"] == 0
+
+        # Read back
+        attrs = await client.read_attribute(env["node_id"], "1/65/0")
+        assert attrs["1/65/0"] == [{"0": "room", "1": "den"}]
 
 
 # ============================================================================

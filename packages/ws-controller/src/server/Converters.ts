@@ -101,9 +101,18 @@ export function convertWebSocketTagBasedToMatter(
         const result: { [key: string]: unknown } = {};
 
         const memberById = getStructMembersById(model);
+        // Python clients before matter-server 1.3.0 serialized struct fields by wire field name
+        // (e.g. "presetHandle") instead of TLV tag, so unrecognized non-numeric keys are resolved
+        // against the same name that convertMatterToWebSocketNameBased emits.
+        const memberByWireName = getStructMembersByWireFieldName(model, clusterModel);
         for (const key of valueKeys) {
-            const member = memberById.get(parseInt(key));
+            const isTag = /^\d+$/.test(key);
+            const member = isTag ? memberById.get(parseInt(key)) : memberByWireName.get(key);
             if (member !== undefined) {
+                // Old Python clients send null for unset optional fields instead of omitting them.
+                if (value[key] === null && !member.mandatory && !member.nullable) {
+                    continue;
+                }
                 result[member.propertyName] = convertWebSocketTagBasedToMatter(value[key], member, clusterModel);
             } else {
                 // Keep unknown keys as-is (fallback for unknown attributes)
@@ -278,6 +287,37 @@ function getStructMembersByLowerName(model: ValueModel): Map<string, ValueModel>
         if (member.name !== undefined) members.set(member.name.toLowerCase(), member);
     }
     structMembersByLowerNameCache.set(model, members);
+    return members;
+}
+
+/**
+ * Wire field name lookups depend on cluster-qualified overrides in FIELD_NAME_OVERRIDES, so a
+ * struct shared across clusters (e.g. a global struct) can map differently per cluster - cache
+ * keyed by clusterModel first, then model, matching the getBitmapMembers pattern.
+ */
+const structMembersByWireNameCache = new WeakMap<ClusterModel, WeakMap<ValueModel, Map<string, ValueModel>>>();
+
+function getStructMembersByWireFieldName(model: ValueModel, clusterModel: ClusterModel): Map<string, ValueModel> {
+    let byModel = structMembersByWireNameCache.get(clusterModel);
+    if (byModel === undefined) {
+        byModel = new WeakMap();
+        structMembersByWireNameCache.set(clusterModel, byModel);
+    }
+
+    let members = byModel.get(model);
+    if (members !== undefined) return members;
+
+    members = new Map();
+    for (const member of model.members) {
+        if (member.name === undefined) continue;
+        const wireName = matterNameToWireField(member.name, clusterModel.name);
+        members.set(wireName, member);
+        // A member's wire name must win any key collision with another member's propertyName alias
+        if (member.propertyName !== wireName && !members.has(member.propertyName)) {
+            members.set(member.propertyName, member);
+        }
+    }
+    byModel.set(model, members);
     return members;
 }
 

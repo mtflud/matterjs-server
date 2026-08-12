@@ -107,25 +107,27 @@ export class LogLevelSection extends LitElement {
                     )}
                 </md-outlined-select>
             </div>
-            ${this._fileLevel !== null
-                ? html`
-                      <div class="form-field">
-                          <label>File Log Level</label>
-                          <md-outlined-select name="file" .value=${this._fileLevel}>
-                              ${LOG_LEVELS.map(
-                                  level => html`
-                                      <md-select-option
-                                          value=${level.value}
-                                          ?selected=${level.value === this._fileLevel}
-                                      >
-                                          <div slot="headline">${level.label}</div>
-                                      </md-select-option>
-                                  `,
-                              )}
-                          </md-outlined-select>
-                      </div>
-                  `
-                : nothing}
+            ${
+                this._fileLevel !== null
+                    ? html`
+                          <div class="form-field">
+                              <label>File Log Level</label>
+                              <md-outlined-select name="file" .value=${this._fileLevel}>
+                                  ${LOG_LEVELS.map(
+                                      level => html`
+                                          <md-select-option
+                                              value=${level.value}
+                                              ?selected=${level.value === this._fileLevel}
+                                          >
+                                              <div slot="headline">${level.label}</div>
+                                          </md-select-option>
+                                      `,
+                                  )}
+                              </md-outlined-select>
+                          </div>
+                      `
+                    : nothing
+            }
             <div class="actions">
                 <md-text-button @click=${handleAsync(() => this._apply())} ?disabled=${this._applying}>
                     ${this._applying ? "Applying..." : "Apply"}

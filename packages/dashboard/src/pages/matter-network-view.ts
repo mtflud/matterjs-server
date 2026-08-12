@@ -354,29 +354,31 @@ class MatterNetworkView extends LitElement {
                                 >
                                     <ha-svg-icon .path=${mdiEyeOff}></ha-svg-icon>
                                 </button>
-                                ${this._showHideMenu
-                                    ? html`
-                                          <div
-                                              id="hide-options-menu"
-                                              class="hide-dropdown"
-                                              role="group"
-                                              aria-label="Hide options"
-                                          >
-                                              ${HIDE_OPTIONS.map(
-                                                  option => html`
-                                                      <label class="hide-option">
-                                                          <input
-                                                              type="checkbox"
-                                                              .checked=${this[option.key]}
-                                                              @change=${() => this._handleToggleHideOption(option.key)}
-                                                          />
-                                                          <span>${option.label}</span>
-                                                      </label>
-                                                  `,
-                                              )}
-                                          </div>
-                                      `
-                                    : ""}
+                                ${
+                                    this._showHideMenu
+                                        ? html`
+                                              <div
+                                                  id="hide-options-menu"
+                                                  class="hide-dropdown"
+                                                  role="group"
+                                                  aria-label="Hide options"
+                                              >
+                                                  ${HIDE_OPTIONS.map(
+                                                      option => html`
+                                                          <label class="hide-option">
+                                                              <input
+                                                                  type="checkbox"
+                                                                  .checked=${this[option.key]}
+                                                                  @change=${() => this._handleToggleHideOption(option.key)}
+                                                              />
+                                                              <span>${option.label}</span>
+                                                          </label>
+                                                      `,
+                                                  )}
+                                              </div>
+                                          `
+                                        : ""
+                                }
                             </div>
                             <button
                                 class="control-button ${this._physicsEnabled ? "" : "active"}"
@@ -388,13 +390,17 @@ class MatterNetworkView extends LitElement {
                         </div>
                     </div>
                 </div>
-                ${this._threadAddressSearchStatus === "idle"
-                    ? ""
-                    : html`<div class="thread-search-status ${this._threadAddressSearchStatus}">
-                          ${this._threadAddressSearchStatus === "found"
-                              ? "Node highlighted."
-                              : "No matching device found."}
-                      </div>`}
+                ${
+                    this._threadAddressSearchStatus === "idle"
+                        ? ""
+                        : html`<div class="thread-search-status ${this._threadAddressSearchStatus}">
+                              ${
+                                  this._threadAddressSearchStatus === "found"
+                                      ? "Node highlighted."
+                                      : "No matching device found."
+                              }
+                          </div>`
+                }
                 <thread-graph
                     .nodes=${this.nodes}
                     .borderRouters=${this._borderRouterStore.entries}

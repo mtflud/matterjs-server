@@ -8,8 +8,11 @@ import { MatterNode, type MatterNodeData } from "@matter-server/ws-client";
 import type { BindingEntryStruct } from "../src/components/dialogs/binding/model.js";
 import {
     bindableClusters,
+    boundClientClusterIds,
     readAllBindings,
     readBindings,
+    readOurBindings,
+    sameBindingTarget,
     reverseAclState,
     sourceClientClusters,
     targetAclCapacityForBinding,
@@ -62,6 +65,110 @@ describe("binding util", () => {
         const result = bindableClusters(source, 1, target, 1);
         expect(result.bindable.sort()).to.deep.equal([6, 768]);
         expect(result.otherTarget).to.deep.equal([8]);
+    });
+
+    it("readAllBindings keeps only our fabric's entries once the fabric index is known", () => {
+        const attributes = {
+            "1/30/0": [{ "1": 2, "3": 1, "4": 6, "254": 1 }],
+            "2/30/0": [{ "1": 3, "3": 1, "4": 8, "254": 2 }],
+        };
+        expect(readAllBindings(node({ ...attributes, "0/62/5": 1 })).map(b => b.endpoint)).to.deep.equal([1]);
+        expect(readAllBindings(node(attributes)).map(b => b.endpoint)).to.deep.equal([1, 2]);
+    });
+
+    it("readOurBindings keeps only our fabric's entries, or all while the fabric index is unknown", () => {
+        const attributes = {
+            "1/30/0": [
+                { "1": 2, "3": 1, "4": 6, "254": 1 },
+                { "1": 3, "3": 1, "4": 8, "254": 2 },
+            ],
+        };
+        expect(readOurBindings(node({ ...attributes, "0/62/5": 1 }), 1).map(b => b.cluster)).to.deep.equal([6]);
+        expect(readOurBindings(node(attributes), 1).map(b => b.cluster)).to.deep.equal([6, 8]);
+    });
+
+    it("sameBindingTarget compares the target fields, normalizing node id types", () => {
+        const unicast = binding({ node: 2, group: undefined, endpoint: 1, cluster: 6 });
+        expect(sameBindingTarget(unicast, binding({ node: BigInt(2), group: undefined, endpoint: 1, cluster: 6 }))).to
+            .be.true;
+        // fabricIndex is not part of the target identity.
+        expect(sameBindingTarget(unicast, { ...unicast, fabricIndex: 9 })).to.be.true;
+        expect(sameBindingTarget(unicast, { ...unicast, cluster: 8 })).to.be.false;
+        expect(sameBindingTarget(unicast, { ...unicast, endpoint: 2 })).to.be.false;
+        expect(sameBindingTarget(unicast, { ...unicast, node: 3 })).to.be.false;
+        // A whole-endpoint entry (no cluster) is not the same target as a cluster-specific one.
+        expect(sameBindingTarget(unicast, { ...unicast, cluster: undefined })).to.be.false;
+        // A group binding never matches a unicast one, even with the same endpoint/cluster.
+        const group = binding({ node: undefined, group: 5, endpoint: undefined, cluster: 6 });
+        expect(sameBindingTarget(group, { ...group })).to.be.true;
+        expect(sameBindingTarget(group, unicast)).to.be.false;
+        // undefined and 0 are different targets — 0 is a legal group id.
+        expect(sameBindingTarget(group, { ...group, group: 0 })).to.be.false;
+    });
+
+    it("boundClientClusterIds collects the clusters covered by existing binding entries", () => {
+        const n = node({ "0/62/5": 1, "1/29/2": [6, 768], "1/30/0": [{ "1": 2, "3": 1, "4": 6, "254": 1 }] });
+        expect([...boundClientClusterIds(n, 1)]).to.deep.equal([6]);
+    });
+
+    it("boundClientClusterIds returns an empty set when the endpoint has no bindings", () => {
+        const n = node({ "0/62/5": 1, "1/29/2": [6, 768] });
+        expect(boundClientClusterIds(n, 1).size).to.equal(0);
+    });
+
+    it("boundClientClusterIds ignores entries belonging to another fabric", () => {
+        const n = node({
+            "0/62/5": 1,
+            "1/29/2": [6, 768],
+            "1/30/0": [
+                { "1": 2, "3": 1, "4": 6, "254": 1 },
+                { "1": 3, "3": 1, "4": 768, "254": 2 },
+            ],
+        });
+        expect([...boundClientClusterIds(n, 1)]).to.deep.equal([6]);
+        const foreignWildcard = node({
+            "0/62/5": 1,
+            "1/29/2": [6, 768],
+            "1/30/0": [{ "1": 3, "3": 1, "254": 2 }],
+        });
+        expect(boundClientClusterIds(foreignWildcard, 1).size).to.equal(0);
+    });
+
+    it("boundClientClusterIds treats a cluster-less entry as covering every client cluster", () => {
+        // Whole-endpoint unicast binding: Node + Endpoint, no Cluster.
+        const wholeEndpoint = node({ "0/62/5": 1, "1/29/2": [6, 768], "1/30/0": [{ "1": 2, "3": 1, "254": 1 }] });
+        expect([...boundClientClusterIds(wholeEndpoint, 1)].sort((a, b) => a - b)).to.deep.equal([6, 768]);
+        // Group binding: Group only, no Cluster.
+        const groupBinding = node({ "0/62/5": 1, "1/29/2": [6, 768], "1/30/0": [{ "2": 5, "254": 1 }] });
+        expect([...boundClientClusterIds(groupBinding, 1)].sort((a, b) => a - b)).to.deep.equal([6, 768]);
+    });
+
+    it("boundClientClusterIds keeps cluster-specific entries alongside a cluster-less one", () => {
+        // 8 is bound but absent from the ClientList, so the wildcard expansion must not replace it.
+        const n = node({
+            "0/62/5": 1,
+            "1/29/2": [6, 768],
+            "1/30/0": [
+                { "1": 2, "3": 1, "4": 8, "254": 1 },
+                { "1": 2, "3": 1, "254": 1 },
+            ],
+        });
+        expect([...boundClientClusterIds(n, 1)].sort((a, b) => a - b)).to.deep.equal([6, 8, 768]);
+    });
+
+    it("boundClientClusterIds does not expand an entry that targets nothing", () => {
+        const n = node({ "0/62/5": 1, "1/29/2": [6, 768], "1/30/0": [{ "254": 1 }] });
+        expect(boundClientClusterIds(n, 1).size).to.equal(0);
+    });
+
+    it("boundClientClusterIds only looks at the requested endpoint", () => {
+        const n = node({
+            "0/62/5": 1,
+            "1/29/2": [6, 768],
+            "1/30/0": [{ "1": 2, "3": 1, "4": 6, "254": 1 }],
+            "2/30/0": [{ "1": 2, "3": 1, "4": 768, "254": 1 }],
+        });
+        expect([...boundClientClusterIds(n, 1)]).to.deep.equal([6]);
     });
 
     it("reverseAclState returns present/missing/overPrivileged/cannotVerify", () => {

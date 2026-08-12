@@ -89,6 +89,43 @@ def dataclass_to_dict(obj_in: DataclassInstance) -> dict:
     )
 
 
+def dataclass_to_tag_dict(obj_in: Any) -> Any:
+    """Recursively convert dataclass instance(s) to TLV tag-keyed dict(s).
+
+    Unlike dataclass_to_dict (keyed by field name, used for DEVICE_COMMAND
+    payloads), WRITE_ATTRIBUTE expects struct values keyed by their numeric
+    TLV tag, matching the format already used for attribute reports.
+
+    Every generated CHIP cluster dataclass (the only kind ever passed to
+    write_attribute()) exposes a `descriptor` with a Tag per field, so the
+    tag lookup always succeeds in practice. A dataclass field is only ever
+    kept name-keyed if `descriptor`/`GetFieldByLabel` is missing/unset for
+    that field, which should not happen for real cluster structs; this is a
+    defensive fallback, not an expected code path.
+
+    A field whose value is None is omitted, matching CHIP's own TLV encoder
+    (ClusterObjects.PutFieldToTLV), which treats None as absent rather than
+    writing an explicit null; NullValue fields are still emitted.
+    """
+    if is_dataclass(obj_in) and not isinstance(obj_in, type):
+        descriptor = getattr(type(obj_in), "descriptor", None)
+        result: dict[str, Any] = {}
+        for field in cached_fields(type(obj_in)):
+            value = getattr(obj_in, field.name)
+            if value is None:
+                continue
+            field_descriptor = descriptor.GetFieldByLabel(field.name) if descriptor is not None else None
+            tag = field_descriptor.Tag if field_descriptor is not None else None
+            key = str(tag) if tag is not None else field.name
+            result[key] = dataclass_to_tag_dict(value)
+        return result
+    if isinstance(obj_in, (list, tuple)):
+        return [dataclass_to_tag_dict(item) for item in obj_in]
+    if isinstance(obj_in, dict):
+        return {key: dataclass_to_tag_dict(value) for key, value in obj_in.items()}
+    return obj_in
+
+
 def parse_utc_timestamp(datetime_string: str) -> datetime:
     """Parse datetime from string."""
     return datetime.fromisoformat(datetime_string)

@@ -10,6 +10,32 @@ The server-side constants live in `packages/ws-controller/src/server/WebSocketCo
 (`SCHEMA_VERSION`, `MIN_SUPPORTED_SCHEMA_VERSION`). Versions predating this document are not
 listed retroactively; entries start at the first version maintained here.
 
+## Schema 13
+
+Minimum supported: 11 (older clients keep working with the pre-13 command shapes).
+
+### Network topology
+
+- **New command `get_network_topology`** → a `NetworkTopology` (`{ collected_at, nodes[], connections[] }`) describing the whole Matter network as a graph: the Thread mesh (nodes + neighbor/route-table links, with external neighbors and mDNS-discovered Border Routers) and the Wi-Fi star (one `wifi_ap` pseudo-node per BSSID — id `ap_<BSSID>` with colons stripped, e.g. `ap_112233445566` — stations linked to it). Ethernet nodes appear unlinked. Optional `refresh` argument re-reads the Thread neighbor/route tables, routing role and network name (and Wi-Fi diagnostics) from every online node before building the snapshot (slower — seconds; best-effort, concurrency-capped, under an overall deadline, and shared between concurrent requesters); omitted/`false` builds from the current attribute cache.
+  - Node kinds: `matter` (commissioned here; carries `node_id`), `border_router`, `thread_unknown` (a neighbour not commissioned on this fabric), `wifi_ap`. Thread connections keep both observed directions (`source_to_target` / `target_to_source`) so asymmetric links stay legible; the top-level `strength` is the strongest observed direction. `strength` values are `strong` / `medium` / `weak` / `none` / `unknown` — `none` means the link was observed dead (Thread pairs with no live direction are omitted entirely), `unknown` means no measurement was available (e.g. a Wi-Fi station whose RSSI can't be read) and must not be rendered as a dead link. Border Router classification depends on mDNS discovery: when the server runs with Thread diagnostics disabled, no `border_router` nodes appear and every external neighbour is reported as `thread_unknown`.
+- **New event `network_topology_updated`** → a `NetworkTopology`, emitted (debounced, latest-wins coalesced) whenever the derived graph changes, plus a slow periodic refresh so sleepy-device drift is eventually reflected. **Delivered only to connections that have issued `get_network_topology`** during their lifetime — mirroring the schema-12 `thread_diagnostics_updated` opt-in so pre-schema-13 clients never receive an event type they didn't subscribe to. **Outgoing events carry no `require_schema`**; clients detect support via `server_info.schema_version >= 13`.
+
+See `packages/ws-client/src/models/model.ts` for the exact `NetworkTopology` / `NetworkTopologyNode` /
+`NetworkTopologyConnection` wire shapes (each field documented inline).
+
+> This first iteration derives Thread links from the nodes' own `ThreadNetworkDiagnostics` (neighbor +
+> route tables) and classifies externals against the passively-discovered Border Router registry. The
+> richer MeshCoP diagnostic enrichment (route64 / childTable → router-to-router links and
+> diagnostic-only mesh nodes) is a planned follow-up; the wire model already accommodates it.
+
+### OTA firmware upload
+
+- **New command `initiate_ota_upload`** (no arguments) → `{ upload_id, expires_in, max_size }`. Authorizes exactly one upload of a local `.ota` firmware image and claims one of the server's limited in-flight upload slots. `upload_id` is a random 32-hex string, single-use, bound to the client that reserved it, and valid for `expires_in` seconds — that window bounds when the following POST may *start*; the transfer itself is bounded by `max_size` (bytes), not by time. Fails with `OtaUploadError` (101) when OTA support is disabled (`--disable-ota`) or all slots are taken (`--ota-upload-max-in-flight`, default 5).
+- **New HTTP endpoint `POST /ota-upload/<upload_id>`** on the same listener as `/ws` — not a WebSocket command, so a firmware image neither pays the ~33% base64 overhead nor has to be buffered whole in memory. Body is the raw `.ota` bytes. Answers `200` with a `MatterSoftwareVersion` (`update_source: "local"`), `400` `{ error_code, message }` for a corrupt image / unknown / expired / already-used / foreign-client id, `404` for a malformed id, `413` when the image exceeds `max_size` (`--ota-upload-max-size-mb`, default 64). The reservation and the staged file are always discarded before the response is sent, success or failure.
+- **New error code `OtaUploadError` = 101** (OHF extension; python-matter-server codes stop at 11).
+- Stored images are indexed by the vendor ID / product ID / software version in their header, not against a node: `check_node_update` surfaces one for any node whose vendor/product matches (its cached answer for that vendor/product is dropped on upload). *Test* images are only served when the server also runs with `--enable-test-net-dcl`, the same restriction that applies to `--ota-provider-dir`.
+- **Clients detect support via `server_info.schema_version >= 13`** — the endpoint is unavailable both on older servers and when OTA is disabled.
+
 ## Schema 12
 
 Minimum supported: 11 (older clients keep working with the pre-12 command shapes).

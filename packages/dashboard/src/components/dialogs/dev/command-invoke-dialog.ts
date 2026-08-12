@@ -112,16 +112,20 @@ export class CommandInvokeDialog extends LitElement {
                         aria-describedby="invoke-path${this._error ? " invoke-error" : ""}"
                         rows="8"
                     ></textarea>
-                    ${this._error
-                        ? html`<div id="invoke-error" class="error" role="alert">${this._error}</div>`
-                        : nothing}
+                    ${
+                        this._error
+                            ? html`<div id="invoke-error" class="error" role="alert">${this._error}</div>`
+                            : nothing
+                    }
                     ${this._success ? html`<div class="success" role="status">Success</div>` : nothing}
-                    ${this._response !== null
-                        ? html`
-                              <label class="textarea-label">Response</label>
-                              <pre class="response"><code>${this._response}</code></pre>
-                          `
-                        : nothing}
+                    ${
+                        this._response !== null
+                            ? html`
+                                  <label class="textarea-label">Response</label>
+                                  <pre class="response"><code>${this._response}</code></pre>
+                              `
+                            : nothing
+                    }
                 </div>
                 <div slot="actions">
                     <md-text-button @click=${this._close} ?disabled=${this._busy}>Close</md-text-button>

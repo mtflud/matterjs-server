@@ -82,106 +82,115 @@ export class AvsumPtzStrip extends LitElement {
 
         return html`
             <div class="strip">
-                ${hasMech || features.dptz
-                    ? html`<div class="group movement">
-                          <div class="dpad">
-                              <span></span>
-                              <md-icon-button
-                                  ?disabled=${this._isDisabled(effective, "tilt", features, movement)}
-                                  title="Tilt up"
-                                  @click=${handleAsyncEvent((e: MouseEvent) =>
-                                      this._move(effective, "tilt", this._step(e, 10)),
-                                  )}
-                              >
-                                  <ha-svg-icon .path=${mdiArrowUp}></ha-svg-icon>
-                              </md-icon-button>
-                              <span></span>
-                              <md-icon-button
-                                  ?disabled=${this._isDisabled(effective, "pan", features, movement)}
-                                  title="Pan left"
-                                  @click=${handleAsyncEvent((e: MouseEvent) =>
-                                      this._move(effective, "pan", this._step(e, -10)),
-                                  )}
-                              >
-                                  <ha-svg-icon .path=${mdiArrowLeft}></ha-svg-icon>
-                              </md-icon-button>
-                              <span></span>
-                              <md-icon-button
-                                  ?disabled=${this._isDisabled(effective, "pan", features, movement)}
-                                  title="Pan right"
-                                  @click=${handleAsyncEvent((e: MouseEvent) =>
-                                      this._move(effective, "pan", this._step(e, 10)),
-                                  )}
-                              >
-                                  <ha-svg-icon .path=${mdiArrowRight}></ha-svg-icon>
-                              </md-icon-button>
-                              <span></span>
-                              <md-icon-button
-                                  ?disabled=${this._isDisabled(effective, "tilt", features, movement)}
-                                  title="Tilt down"
-                                  @click=${handleAsyncEvent((e: MouseEvent) =>
-                                      this._move(effective, "tilt", this._step(e, -10)),
-                                  )}
-                              >
-                                  <ha-svg-icon .path=${mdiArrowDown}></ha-svg-icon>
-                              </md-icon-button>
-                              <span></span>
-                          </div>
-                          <div class="zoom">
-                              <md-icon-button
-                                  ?disabled=${this._isDisabled(effective, "zoom", features, movement)}
-                                  title="Zoom in"
-                                  @click=${handleAsyncEvent((e: MouseEvent) =>
-                                      this._move(effective, "zoom", this._step(e, 10)),
-                                  )}
-                              >
-                                  <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
-                              </md-icon-button>
-                              <md-icon-button
-                                  ?disabled=${this._isDisabled(effective, "zoom", features, movement)}
-                                  title="Zoom out"
-                                  @click=${handleAsyncEvent((e: MouseEvent) =>
-                                      this._move(effective, "zoom", this._step(e, -10)),
-                                  )}
-                              >
-                                  <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
-                              </md-icon-button>
-                          </div>
-                          ${hasMech && features.dptz
-                              ? html`<div class="mode-toggle">
-                                    <button
-                                        class=${this._mode === "mech" ? "active" : ""}
-                                        @click=${() => (this._mode = "mech")}
-                                    >
-                                        Mech
-                                    </button>
-                                    <button
-                                        class=${this._mode === "digital" ? "active" : ""}
-                                        @click=${() => (this._mode = "digital")}
-                                    >
-                                        Digital
-                                    </button>
-                                </div>`
-                              : nothing}
-                          ${effective === "digital" && this.activeVideoStreamId === null
-                              ? html`<span class="mode-hint">Start stream to enable DPTZ</span>`
-                              : nothing}
-                      </div>`
-                    : nothing}
-                ${features.mPresets && presets.length > 0
-                    ? html`<div class="group presets">
-                          ${presets.map(
-                              p => html`<button
-                                  class="chip"
-                                  title="p=${p.settings.pan ?? 0}° · t=${p.settings.tilt ?? 0}° · z=${p.settings.zoom ??
-                                  1}×"
-                                  @click=${handleAsync(() => this._handleGoPreset(p.presetId))}
-                              >
-                                  ${p.name}
-                              </button>`,
-                          )}
-                      </div>`
-                    : nothing}
+                ${
+                    hasMech || features.dptz
+                        ? html`<div class="group movement">
+                              <div class="dpad">
+                                  <span></span>
+                                  <md-icon-button
+                                      ?disabled=${this._isDisabled(effective, "tilt", features, movement)}
+                                      title="Tilt up"
+                                      @click=${handleAsyncEvent((e: MouseEvent) =>
+                                          this._move(effective, "tilt", this._step(e, 10)),
+                                      )}
+                                  >
+                                      <ha-svg-icon .path=${mdiArrowUp}></ha-svg-icon>
+                                  </md-icon-button>
+                                  <span></span>
+                                  <md-icon-button
+                                      ?disabled=${this._isDisabled(effective, "pan", features, movement)}
+                                      title="Pan left"
+                                      @click=${handleAsyncEvent((e: MouseEvent) =>
+                                          this._move(effective, "pan", this._step(e, -10)),
+                                      )}
+                                  >
+                                      <ha-svg-icon .path=${mdiArrowLeft}></ha-svg-icon>
+                                  </md-icon-button>
+                                  <span></span>
+                                  <md-icon-button
+                                      ?disabled=${this._isDisabled(effective, "pan", features, movement)}
+                                      title="Pan right"
+                                      @click=${handleAsyncEvent((e: MouseEvent) =>
+                                          this._move(effective, "pan", this._step(e, 10)),
+                                      )}
+                                  >
+                                      <ha-svg-icon .path=${mdiArrowRight}></ha-svg-icon>
+                                  </md-icon-button>
+                                  <span></span>
+                                  <md-icon-button
+                                      ?disabled=${this._isDisabled(effective, "tilt", features, movement)}
+                                      title="Tilt down"
+                                      @click=${handleAsyncEvent((e: MouseEvent) =>
+                                          this._move(effective, "tilt", this._step(e, -10)),
+                                      )}
+                                  >
+                                      <ha-svg-icon .path=${mdiArrowDown}></ha-svg-icon>
+                                  </md-icon-button>
+                                  <span></span>
+                              </div>
+                              <div class="zoom">
+                                  <md-icon-button
+                                      ?disabled=${this._isDisabled(effective, "zoom", features, movement)}
+                                      title="Zoom in"
+                                      @click=${handleAsyncEvent((e: MouseEvent) =>
+                                          this._move(effective, "zoom", this._step(e, 10)),
+                                      )}
+                                  >
+                                      <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
+                                  </md-icon-button>
+                                  <md-icon-button
+                                      ?disabled=${this._isDisabled(effective, "zoom", features, movement)}
+                                      title="Zoom out"
+                                      @click=${handleAsyncEvent((e: MouseEvent) =>
+                                          this._move(effective, "zoom", this._step(e, -10)),
+                                      )}
+                                  >
+                                      <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
+                                  </md-icon-button>
+                              </div>
+                              ${
+                                  hasMech && features.dptz
+                                      ? html`<div class="mode-toggle">
+                                            <button
+                                                class=${this._mode === "mech" ? "active" : ""}
+                                                @click=${() => (this._mode = "mech")}
+                                            >
+                                                Mech
+                                            </button>
+                                            <button
+                                                class=${this._mode === "digital" ? "active" : ""}
+                                                @click=${() => (this._mode = "digital")}
+                                            >
+                                                Digital
+                                            </button>
+                                        </div>`
+                                      : nothing
+                              }
+                              ${
+                                  effective === "digital" && this.activeVideoStreamId === null
+                                      ? html`<span class="mode-hint">Start stream to enable DPTZ</span>`
+                                      : nothing
+                              }
+                          </div>`
+                        : nothing
+                }
+                ${
+                    features.mPresets && presets.length > 0
+                        ? html`<div class="group presets">
+                              ${presets.map(
+                                  p => html`<button
+                                      class="chip"
+                                      title="p=${p.settings.pan ?? 0}° · t=${p.settings.tilt ?? 0}° · z=${
+                                          p.settings.zoom ?? 1
+                                      }×"
+                                      @click=${handleAsync(() => this._handleGoPreset(p.presetId))}
+                                  >
+                                      ${p.name}
+                                  </button>`,
+                              )}
+                          </div>`
+                        : nothing
+                }
                 <div class="group readout">
                     ${features.mPan && pos.pan !== null ? html`<span>Pan ${this._fmt(pos.pan)}°</span>` : nothing}
                     ${features.mTilt && pos.tilt !== null ? html`<span>Tilt ${this._fmt(pos.tilt)}°</span>` : nothing}

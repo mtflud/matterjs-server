@@ -10,7 +10,13 @@
  */
 
 // Registry exports
-export { getClusterCommandsTag, hasClusterCommands, registerClusterCommands } from "./registry.js";
+export {
+    getClusterCommandsTag,
+    hasClusterCommands,
+    registerClusterCommands,
+    rendersClusterCommandsWhenOffline,
+    type ClusterCommandsRegistration,
+} from "./registry.js";
 
 // Base class for creating new cluster commands
 export { BaseClusterCommands } from "./base-cluster-commands.js";
@@ -22,6 +28,9 @@ import "./clusters/basic-information-commands.js";
 import "./clusters/binding-commands.js";
 import "./clusters/chime-commands.js";
 import "./clusters/closure-control-commands.js";
+import "./clusters/commodity-tariff-commands.js";
 import "./clusters/icd-management-commands.js";
 import "./clusters/level-control-commands.js";
+import "./clusters/meter-identification-commands.js";
 import "./clusters/on-off-commands.js";
+import "./clusters/thermostat-commands.js";

@@ -83,14 +83,20 @@ class MatterNodeView extends LitElement {
                 <div class="node-title-bar">
                     <ha-svg-icon class="node-icon" .path=${getDeviceIcon(this.node)}></ha-svg-icon>
                     <h2>Node ${this.node.node_id} <span class="node-id-hex">${nodeHex}</span></h2>
-                    ${showGraphButton
-                        ? html`
-                              <a href=${graphUrl} class="show-in-graph-button" title="Show in ${graphViewType} graph">
-                                  <ha-svg-icon .path=${mdiGraphOutline}></ha-svg-icon>
-                                  <span class="button-text">Show in graph</span>
-                              </a>
-                          `
-                        : ""}
+                    ${
+                        showGraphButton
+                            ? html`
+                                  <a
+                                      href=${graphUrl}
+                                      class="show-in-graph-button"
+                                      title="Show in ${graphViewType} graph"
+                                  >
+                                      <ha-svg-icon .path=${mdiGraphOutline}></ha-svg-icon>
+                                      <span class="button-text">Show in graph</span>
+                                  </a>
+                              `
+                            : ""
+                    }
                 </div>
                 <node-details .node=${this.node}></node-details>
             </div>

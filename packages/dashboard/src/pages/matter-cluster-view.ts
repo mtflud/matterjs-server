@@ -12,7 +12,7 @@ import "@material/web/iconbutton/outlined-icon-button";
 import "@material/web/list/list";
 import "@material/web/list/list-item";
 import { isTestNodeId, MatterClient, MatterNode, toBigIntAwareJson } from "@matter-server/ws-client";
-import { mdiAlertCircleOutline, mdiPencil, mdiPlay, mdiRefresh } from "@mdi/js";
+import { mdiAlertCircleOutline, mdiFilterOffOutline, mdiPencil, mdiPlay, mdiRefresh } from "@mdi/js";
 import { css, html, LitElement, nothing, type TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
@@ -33,8 +33,12 @@ import {
     DESCRIPTOR_CLUSTER_ID,
     TAG_LIST_ATTR,
 } from "../util/semantic-tags.js";
-import { notFoundStyles } from "../util/shared-styles.js";
-import { BaseClusterCommands, getClusterCommandsTag } from "./cluster-commands/index.js";
+import { infoPanelStyles, notFoundStyles } from "../util/shared-styles.js";
+import {
+    BaseClusterCommands,
+    getClusterCommandsTag,
+    rendersClusterCommandsWhenOffline,
+} from "./cluster-commands/index.js";
 import { bindingContext } from "./components/context.js";
 
 declare global {
@@ -105,6 +109,8 @@ class MatterClusterView extends LitElement {
 
     // Per-attribute refresh state, keyed by attribute id (within the current ep/cluster)
     @state() private _refreshState: Record<number, RefreshState> = {};
+    @state() private _unfilteredBusy: Record<number, boolean> = {};
+    private _viewKey = "";
 
     private _unsubscribeDev?: () => void;
 
@@ -177,26 +183,32 @@ class MatterClusterView extends LitElement {
                         (attribute, index) => html`
                             <md-list-item class=${index % 2 === 1 ? "alternate-row" : ""}>
                                 <div slot="headline">
-                                    ${clusters[this.cluster!]?.attributes[attribute.key]?.label ??
-                                    "Custom/Unknown Attribute"}
+                                    ${
+                                        clusters[this.cluster!]?.attributes[attribute.key]?.label ??
+                                        "Custom/Unknown Attribute"
+                                    }
                                 </div>
                                 <div slot="supporting-text">
                                     AttributeId: ${attribute.key} (${formatHex(attribute.key)}) - Value type:
                                     ${clusters[this.cluster!]?.attributes[attribute.key]?.type ?? "unknown"}
                                 </div>
                                 <div slot="end" class="row-end">
-                                    ${this._devMode
-                                        ? this._renderAttributeDevActions(attribute.key, attribute.value)
-                                        : nothing}
-                                    ${toBigIntAwareJson(attribute.value).length > 30
-                                        ? html`<md-outlined-button
-                                              @click=${() => {
-                                                  this._showAttributeValue(attribute.value);
-                                              }}
-                                          >
-                                              Show value
-                                          </md-outlined-button>`
-                                        : html`<code>${toBigIntAwareJson(attribute.value)}</code>`}
+                                    ${
+                                        this._devMode
+                                            ? this._renderAttributeDevActions(attribute.key, attribute.value)
+                                            : nothing
+                                    }
+                                    ${
+                                        toBigIntAwareJson(attribute.value).length > 30
+                                            ? html`<md-outlined-button
+                                                  @click=${() => {
+                                                      this._showAttributeValue(attribute.value);
+                                                  }}
+                                              >
+                                                  Show value
+                                              </md-outlined-button>`
+                                            : html`<code>${toBigIntAwareJson(attribute.value)}</code>`
+                                    }
                                 </div>
                             </md-list-item>
                         `,
@@ -223,19 +235,30 @@ class MatterClusterView extends LitElement {
                 >
                     <ha-svg-icon .path=${mdiRefresh}></ha-svg-icon>
                 </md-outlined-icon-button>
-                ${meta?.writable
-                    ? html`
-                          <md-outlined-icon-button
-                              class="dev-action pencil"
-                              title="Write attribute…"
-                              aria-label="Write attribute"
-                              ?disabled=${!online}
-                              @click=${() => this._openAttributeWriteDialog(attributeId, currentValue, meta.label)}
-                          >
-                              <ha-svg-icon .path=${mdiPencil}></ha-svg-icon>
-                          </md-outlined-icon-button>
-                      `
-                    : nothing}
+                <md-outlined-icon-button
+                    class="dev-action unfiltered"
+                    title="Read unfiltered (all fabrics) — shown only, not cached"
+                    aria-label="Read attribute unfiltered"
+                    ?disabled=${!online || this._unfilteredBusy[attributeId] === true}
+                    @click=${() => this._readUnfiltered(attributeId)}
+                >
+                    <ha-svg-icon .path=${mdiFilterOffOutline}></ha-svg-icon>
+                </md-outlined-icon-button>
+                ${
+                    meta?.writable
+                        ? html`
+                              <md-outlined-icon-button
+                                  class="dev-action pencil"
+                                  title="Write attribute…"
+                                  aria-label="Write attribute"
+                                  ?disabled=${!online}
+                                  @click=${() => this._openAttributeWriteDialog(attributeId, currentValue, meta.label)}
+                              >
+                                  <ha-svg-icon .path=${mdiPencil}></ha-svg-icon>
+                              </md-outlined-icon-button>
+                          `
+                        : nothing
+                }
             </span>
         `;
     }
@@ -253,9 +276,10 @@ class MatterClusterView extends LitElement {
 
         this._refreshState = { ...this._refreshState, [attributeId]: "loading" };
         try {
-            const result = await this.client.readAttribute(nodeId, path);
+            // Fabric-filtered to match the subscription: matter.js discards a read whose filtering
+            // differs, so an unfiltered one would put values into the cache that nothing ever refreshes.
+            const result = await this.client.readAttribute(nodeId, path, undefined, true);
             if (!isSameContext()) return;
-            // Defensive merge — attribute_updated events usually do this already.
             for (const [key, value] of Object.entries(result)) {
                 this.node.attributes[key] = value;
             }
@@ -271,7 +295,45 @@ class MatterClusterView extends LitElement {
             if (!isSameContext()) return;
             this._refreshState = { ...this._refreshState, [attributeId]: "idle" };
             const message = err instanceof Error ? err.message : String(err);
-            showAlertDialog({ title: "Read failed", text: message });
+            showAlertDialog({ title: "Read failed", text: message }).catch(alertErr =>
+                console.error("Failed to show the read error", alertErr),
+            );
+        }
+    }
+
+    /**
+     * Read across all fabrics for diagnostics. The result is displayed only — merging it would put
+     * values into the attribute cache that the fabric-filtered subscription never refreshes.
+     */
+    private async _readUnfiltered(attributeId: number) {
+        if (!this.node) return;
+        const nodeId = this.node.node_id;
+        const endpoint = this.endpoint;
+        const cluster = this.cluster;
+        const path = `${endpoint}/${cluster}/${attributeId}`;
+        // The busy flag is cleared for the same view even while detached, since nothing resets it on
+        // reconnect and the button would stay disabled forever.
+        const isSameView = () =>
+            this.node?.node_id === nodeId && this.endpoint === endpoint && this.cluster === cluster;
+        const isSameContext = () => this.isConnected && isSameView();
+
+        this._unfilteredBusy = { ...this._unfilteredBusy, [attributeId]: true };
+        try {
+            const result = await this.client.readAttribute(nodeId, path, undefined, false);
+            if (!isSameContext()) return;
+            showAlertDialog({
+                title: "Unfiltered read (all fabrics)",
+                text: path in result ? toBigIntAwareJson(result[path]) : "The device returned no value for this path.",
+                asCodeBlock: true,
+            }).catch(err => console.error("Failed to show the unfiltered read", err));
+        } catch (err) {
+            if (!isSameContext()) return;
+            showAlertDialog({
+                title: "Read failed",
+                text: err instanceof Error ? err.message : String(err),
+            }).catch(alertErr => console.error("Failed to show the read error", alertErr));
+        } finally {
+            if (isSameView()) this._unfilteredBusy = { ...this._unfilteredBusy, [attributeId]: false };
         }
     }
 
@@ -308,33 +370,35 @@ class MatterClusterView extends LitElement {
                         Commands
                     </summary>
                     <div class="dev-commands-content">
-                        ${commands.length === 0
-                            ? html`<p class="empty">No invokable commands for this cluster.</p>`
-                            : html`
-                                  <ul class="command-list">
-                                      ${commands.map(
-                                          cmd => html`
-                                              <li class="command-row">
-                                                  <div class="command-meta">
-                                                      <span class="command-label">${cmd.label}</span>
-                                                      <span class="command-sub"
-                                                          >CommandId ${cmd.id} (${formatHex(cmd.id)}) ·
-                                                          <code>${cmd.name}</code></span
+                        ${
+                            commands.length === 0
+                                ? html`<p class="empty">No invokable commands for this cluster.</p>`
+                                : html`
+                                      <ul class="command-list">
+                                          ${commands.map(
+                                              cmd => html`
+                                                  <li class="command-row">
+                                                      <div class="command-meta">
+                                                          <span class="command-label">${cmd.label}</span>
+                                                          <span class="command-sub"
+                                                              >CommandId ${cmd.id} (${formatHex(cmd.id)}) ·
+                                                              <code>${cmd.name}</code></span
+                                                          >
+                                                      </div>
+                                                      <md-outlined-button
+                                                          class="dev-invoke-button"
+                                                          ?disabled=${!online}
+                                                          @click=${() => this._openCommandInvokeDialog(cmd.id, cmd.name)}
                                                       >
-                                                  </div>
-                                                  <md-outlined-button
-                                                      class="dev-invoke-button"
-                                                      ?disabled=${!online}
-                                                      @click=${() => this._openCommandInvokeDialog(cmd.id, cmd.name)}
-                                                  >
-                                                      <ha-svg-icon slot="icon" .path=${mdiPlay}></ha-svg-icon>
-                                                      Invoke
-                                                  </md-outlined-button>
-                                              </li>
-                                          `,
-                                      )}
-                                  </ul>
-                              `}
+                                                          <ha-svg-icon slot="icon" .path=${mdiPlay}></ha-svg-icon>
+                                                          Invoke
+                                                      </md-outlined-button>
+                                                  </li>
+                                              `,
+                                          )}
+                                      </ul>
+                                  `
+                        }
                     </div>
                 </details>
             </div>
@@ -382,19 +446,21 @@ class MatterClusterView extends LitElement {
         return html`
             <div class="info-section">
                 <div class="info-section-header">Active Features</div>
-                ${activeFeatures.length === 0
-                    ? html`<p class="empty">No active features</p>`
-                    : html`
-                          <ul class="chip-list">
-                              ${activeFeatures.map(
-                                  feature => html`
-                                      <li class="chip" title="Bit ${feature.bit} (${feature.code})">
-                                          ${feature.label}
-                                      </li>
-                                  `,
-                              )}
-                          </ul>
-                      `}
+                ${
+                    activeFeatures.length === 0
+                        ? html`<p class="empty">No active features</p>`
+                        : html`
+                              <ul class="chip-list">
+                                  ${activeFeatures.map(
+                                      feature => html`
+                                          <li class="chip" title="Bit ${feature.bit} (${feature.code})">
+                                              ${feature.label}
+                                          </li>
+                                      `,
+                                  )}
+                              </ul>
+                          `
+                }
             </div>
         `;
     }
@@ -409,18 +475,20 @@ class MatterClusterView extends LitElement {
         return html`
             <div class="info-section">
                 <div class="info-section-header">Semantic Tags (TagList)</div>
-                ${tagList.length === 0
-                    ? html`<p class="empty">No semantic tags</p>`
-                    : html`
-                          <ul class="chip-list">
-                              ${tagList.map(entry => {
-                                  const { text, title, erroneous } = describeSemanticTagListEntry(entry);
-                                  return html`<li class=${erroneous ? "chip chip-error" : "chip"} title=${title}>
-                                      ${text}
-                                  </li>`;
-                              })}
-                          </ul>
-                      `}
+                ${
+                    tagList.length === 0
+                        ? html`<p class="empty">No semantic tags</p>`
+                        : html`
+                              <ul class="chip-list">
+                                  ${tagList.map(entry => {
+                                      const { text, title, erroneous } = describeSemanticTagListEntry(entry);
+                                      return html`<li class=${erroneous ? "chip chip-error" : "chip"} title=${title}>
+                                          ${text}
+                                      </li>`;
+                                  })}
+                              </ul>
+                          `
+                }
             </div>
         `;
     }
@@ -435,11 +503,7 @@ class MatterClusterView extends LitElement {
 
     private _renderClusterCommands() {
         if (this.cluster === undefined) return html``;
-        // ACL (31) and Binding (30) panels stay visible read-only for offline nodes; ICD management (70)
-        // stays visible and actionable since its commands target sleeping devices. Commands for other
-        // clusters are hidden while the device is unreachable.
-        const RENDER_WHEN_OFFLINE = new Set<number>([30, 31, 70]);
-        if (!this.node?.available && !RENDER_WHEN_OFFLINE.has(this.cluster)) return html``;
+        if (!this.node?.available && !rendersClusterCommandsWhenOffline(this.cluster)) return html``;
 
         const tagName = getClusterCommandsTag(this.cluster);
         if (!tagName) return html``;
@@ -458,9 +522,13 @@ class MatterClusterView extends LitElement {
     override updated(changedProperties: Map<string, unknown>) {
         super.updated(changedProperties);
 
-        // Reset per-attribute refresh state when navigating to a different cluster/endpoint.
-        if (changedProperties.has("cluster") || changedProperties.has("endpoint")) {
+        // Reset per-attribute read state when navigating to a different node/endpoint/cluster. Keyed on
+        // the node id, not the property: `node` is a fresh object on every nodes_changed tick.
+        const viewKey = `${this.node?.node_id ?? ""}/${this.endpoint}/${this.cluster}`;
+        if (viewKey !== this._viewKey) {
+            this._viewKey = viewKey;
             this._refreshState = {};
+            this._unfilteredBusy = {};
             this._scrollCommandPanelIntoView();
         }
 
@@ -490,6 +558,7 @@ class MatterClusterView extends LitElement {
 
     static override styles = [
         notFoundStyles,
+        infoPanelStyles,
         css`
             :host {
                 display: block;
@@ -709,42 +778,6 @@ class MatterClusterView extends LitElement {
                 background: var(--md-sys-color-surface-container-high);
                 padding: 0 4px;
                 border-radius: 3px;
-            }
-
-            .info-panel {
-                background-color: var(--md-sys-color-surface-container);
-                border: 1px solid var(--md-sys-color-outline-variant);
-                border-radius: 12px;
-                padding: 14px 16px;
-            }
-
-            .info-section + .info-section {
-                margin-top: 12px;
-                padding-top: 12px;
-                border-top: 1px solid var(--md-sys-color-outline-variant);
-            }
-
-            .info-section-header {
-                font-weight: 500;
-                color: var(--md-sys-color-on-surface);
-                margin-bottom: 10px;
-            }
-
-            .chip-list {
-                list-style: none;
-                margin: 0;
-                padding: 0;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-            }
-
-            .chip {
-                font-size: 0.85rem;
-                color: var(--md-sys-color-on-secondary-container);
-                background: var(--md-sys-color-secondary-container);
-                padding: 4px 10px;
-                border-radius: 8px;
             }
 
             .chip.chip-error {

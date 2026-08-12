@@ -1011,9 +1011,11 @@ export class ThreadGraph extends BaseNetworkGraph {
                 <div class="empty-state">
                     <p>${allOfflineFiltered ? "No online Thread devices" : "No Thread devices found"}</p>
                     <p class="hint">
-                        ${allOfflineFiltered
-                            ? 'Disable the "Offline nodes" filter to show offline devices'
-                            : "Thread devices will appear here once commissioned"}
+                        ${
+                            allOfflineFiltered
+                                ? 'Disable the "Offline nodes" filter to show offline devices'
+                                : "Thread devices will appear here once commissioned"
+                        }
                     </p>
                 </div>
             `;

@@ -75,198 +75,221 @@ class AvsumClusterCommands extends BaseClusterCommands {
                 <summary>Camera AV Settings — Pan / Tilt / Zoom</summary>
                 <div class="command-content">
                     <div class="readout">
-                        ${features.mPan && pos.pan !== null
-                            ? html`<span><b>Pan</b> ${this._fmtDeg(pos.pan)}</span>`
-                            : nothing}
-                        ${features.mTilt && pos.tilt !== null
-                            ? html`<span><b>Tilt</b> ${this._fmtDeg(pos.tilt)}</span>`
-                            : nothing}
+                        ${
+                            features.mPan && pos.pan !== null
+                                ? html`<span><b>Pan</b> ${this._fmtDeg(pos.pan)}</span>`
+                                : nothing
+                        }
+                        ${
+                            features.mTilt && pos.tilt !== null
+                                ? html`<span><b>Tilt</b> ${this._fmtDeg(pos.tilt)}</span>`
+                                : nothing
+                        }
                         ${features.mZoom && pos.zoom !== null ? html`<span><b>Zoom</b> ${pos.zoom}×</span>` : nothing}
-                        ${movement !== "unknown"
-                            ? html`<span class="badge ${movement === "moving" ? "moving" : ""}"
-                                  >${movement === "moving" ? "Moving…" : "Idle"}</span
-                              >`
-                            : nothing}
-                        ${features.mPan && ranges.panMin !== null && ranges.panMax !== null
-                            ? html`<span class="range">P [${ranges.panMin}°, ${ranges.panMax}°]</span>`
-                            : nothing}
-                        ${features.mTilt && ranges.tiltMin !== null && ranges.tiltMax !== null
-                            ? html`<span class="range">T [${ranges.tiltMin}°, ${ranges.tiltMax}°]</span>`
-                            : nothing}
-                        ${features.mZoom && ranges.zoomMax !== null
-                            ? html`<span class="range">Z [1×, ${ranges.zoomMax}×]</span>`
-                            : nothing}
+                        ${
+                            movement !== "unknown"
+                                ? html`<span class="badge ${movement === "moving" ? "moving" : ""}"
+                                      >${movement === "moving" ? "Moving…" : "Idle"}</span
+                                  >`
+                                : nothing
+                        }
+                        ${
+                            features.mPan && ranges.panMin !== null && ranges.panMax !== null
+                                ? html`<span class="range">P [${ranges.panMin}°, ${ranges.panMax}°]</span>`
+                                : nothing
+                        }
+                        ${
+                            features.mTilt && ranges.tiltMin !== null && ranges.tiltMax !== null
+                                ? html`<span class="range">T [${ranges.tiltMin}°, ${ranges.tiltMax}°]</span>`
+                                : nothing
+                        }
+                        ${
+                            features.mZoom && ranges.zoomMax !== null
+                                ? html`<span class="range">Z [1×, ${ranges.zoomMax}×]</span>`
+                                : nothing
+                        }
                     </div>
-                    ${features.mPan || features.mTilt || features.mZoom
-                        ? html`<div class="dpad-row">
-                              <div class="dpad-grid">
-                                  <span></span>
-                                  <md-outlined-icon-button
-                                      ?disabled=${!features.mTilt || movement === "moving"}
-                                      title="Tilt up (Shift = fine)"
-                                      aria-label="Tilt up"
-                                      @click=${handleAsyncEvent((e: MouseEvent) =>
-                                          this._move({ tiltDelta: this._stepFromEvent(e, 10) }),
-                                      )}
-                                  >
-                                      <ha-svg-icon .path=${mdiArrowUp}></ha-svg-icon>
-                                  </md-outlined-icon-button>
-                                  <span></span>
-                                  <md-outlined-icon-button
-                                      ?disabled=${!features.mPan || movement === "moving"}
-                                      title="Pan left (Shift = fine)"
-                                      aria-label="Pan left"
-                                      @click=${handleAsyncEvent((e: MouseEvent) =>
-                                          this._move({ panDelta: this._stepFromEvent(e, -10) }),
-                                      )}
-                                  >
-                                      <ha-svg-icon .path=${mdiArrowLeft}></ha-svg-icon>
-                                  </md-outlined-icon-button>
-                                  <span class="dpad-center" aria-hidden="true">
-                                      <ha-svg-icon .path=${mdiCircleMedium}></ha-svg-icon>
-                                  </span>
-                                  <md-outlined-icon-button
-                                      ?disabled=${!features.mPan || movement === "moving"}
-                                      title="Pan right (Shift = fine)"
-                                      aria-label="Pan right"
-                                      @click=${handleAsyncEvent((e: MouseEvent) =>
-                                          this._move({ panDelta: this._stepFromEvent(e, 10) }),
-                                      )}
-                                  >
-                                      <ha-svg-icon .path=${mdiArrowRight}></ha-svg-icon>
-                                  </md-outlined-icon-button>
-                                  <span></span>
-                                  <md-outlined-icon-button
-                                      ?disabled=${!features.mTilt || movement === "moving"}
-                                      title="Tilt down (Shift = fine)"
-                                      aria-label="Tilt down"
-                                      @click=${handleAsyncEvent((e: MouseEvent) =>
-                                          this._move({ tiltDelta: this._stepFromEvent(e, -10) }),
-                                      )}
-                                  >
-                                      <ha-svg-icon .path=${mdiArrowDown}></ha-svg-icon>
-                                  </md-outlined-icon-button>
-                                  <span></span>
-                              </div>
-                              ${features.mZoom
-                                  ? html`<div class="zoom-col">
-                                        <md-outlined-icon-button
-                                            ?disabled=${movement === "moving"}
-                                            title="Zoom in (Shift = fine)"
-                                            aria-label="Zoom in"
-                                            @click=${handleAsyncEvent((e: MouseEvent) =>
-                                                this._move({ zoomDelta: this._stepFromEvent(e, 10) }),
-                                            )}
-                                        >
-                                            <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
-                                        </md-outlined-icon-button>
-                                        <span class="muted small">zoom</span>
-                                        <md-outlined-icon-button
-                                            ?disabled=${movement === "moving"}
-                                            title="Zoom out (Shift = fine)"
-                                            aria-label="Zoom out"
-                                            @click=${handleAsyncEvent((e: MouseEvent) =>
-                                                this._move({ zoomDelta: this._stepFromEvent(e, -10) }),
-                                            )}
-                                        >
-                                            <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
-                                        </md-outlined-icon-button>
-                                    </div>`
-                                  : nothing}
-                          </div>`
-                        : nothing}
-                    ${this._toast ? html`<div class="toast">${this._toast}</div>` : nothing}
-                    ${features.mPresets
-                        ? (() => {
-                              const { items, max } = readPresets(this.node, this.endpoint);
-                              return html`
-                                  <div class="presets-frame">
-                                      <div class="presets-header">
-                                          <span>Presets</span>
-                                          <span class="muted small">${items.length} / ${max}</span>
-                                      </div>
-                                      <div class="chip-row">
-                                          ${items.map(
-                                              p => html`<button
-                                                  class="chip"
-                                                  title="p=${this._fmtDeg(p.settings.pan ?? 0)} · t=${this._fmtDeg(
-                                                      p.settings.tilt ?? 0,
-                                                  )} · z=${p.settings.zoom ?? 1}×"
-                                                  @click=${handleAsync(() => this._goPreset(p.presetId))}
-                                              >
-                                                  ${p.name}
-                                              </button>`,
+                    ${
+                        features.mPan || features.mTilt || features.mZoom
+                            ? html`<div class="dpad-row">
+                                  <div class="dpad-grid">
+                                      <span></span>
+                                      <md-outlined-icon-button
+                                          ?disabled=${!features.mTilt || movement === "moving"}
+                                          title="Tilt up (Shift = fine)"
+                                          aria-label="Tilt up"
+                                          @click=${handleAsyncEvent((e: MouseEvent) =>
+                                              this._move({ tiltDelta: this._stepFromEvent(e, 10) }),
                                           )}
-                                          ${items.length === 0
-                                              ? html`<span class="muted small">No presets saved.</span>`
-                                              : nothing}
-                                      </div>
-                                      <details class="manager">
-                                          <summary>Manage presets…</summary>
-                                          ${items.map(
-                                              p => html`<div class="preset-row">
-                                                  <span class="pid">#${p.presetId}</span>
-                                                  <span class="pname">${p.name}</span>
-                                                  <span class="pcoord">
-                                                      p=${this._fmtDeg(p.settings.pan ?? 0)} ·
-                                                      t=${this._fmtDeg(p.settings.tilt ?? 0)} ·
-                                                      z=${p.settings.zoom ?? 1}×
-                                                  </span>
-                                                  <span class="grow"></span>
-                                                  <md-outlined-icon-button
-                                                      title="Overwrite with current MPTZ"
-                                                      @click=${handleAsync(() => this._savePresetUpdate(p.presetId))}
-                                                  >
-                                                      <ha-svg-icon .path=${mdiContentSaveOutline}></ha-svg-icon>
-                                                  </md-outlined-icon-button>
-                                                  <md-outlined-icon-button
-                                                      title="Rename (also overwrites position with current MPTZ)"
-                                                      aria-label="Rename preset"
-                                                      @click=${handleAsync(() =>
-                                                          this._renamePreset(p.presetId, p.name),
-                                                      )}
-                                                  >
-                                                      <ha-svg-icon .path=${mdiPencil}></ha-svg-icon>
-                                                  </md-outlined-icon-button>
-                                                  <md-outlined-icon-button
-                                                      title="Remove"
-                                                      @click=${handleAsync(() =>
-                                                          this._removePreset(p.presetId, p.name),
-                                                      )}
-                                                  >
-                                                      <ha-svg-icon .path=${mdiTrashCan}></ha-svg-icon>
-                                                  </md-outlined-icon-button>
-                                              </div>`,
+                                      >
+                                          <ha-svg-icon .path=${mdiArrowUp}></ha-svg-icon>
+                                      </md-outlined-icon-button>
+                                      <span></span>
+                                      <md-outlined-icon-button
+                                          ?disabled=${!features.mPan || movement === "moving"}
+                                          title="Pan left (Shift = fine)"
+                                          aria-label="Pan left"
+                                          @click=${handleAsyncEvent((e: MouseEvent) =>
+                                              this._move({ panDelta: this._stepFromEvent(e, -10) }),
                                           )}
-                                          <div class="add-bar">
-                                              <input
-                                                  class="add-input"
-                                                  placeholder="New preset name…"
-                                                  .value=${this._newPresetName}
-                                                  @input=${(e: Event) =>
-                                                      (this._newPresetName = (e.target as HTMLInputElement).value)}
-                                              />
-                                              <md-outlined-button
-                                                  ?disabled=${!this._newPresetName.trim() || items.length >= max}
-                                                  @click=${handleAsync(() => this._saveNewPreset())}
-                                              >
-                                                  Save current MPTZ
-                                              </md-outlined-button>
-                                          </div>
-                                      </details>
+                                      >
+                                          <ha-svg-icon .path=${mdiArrowLeft}></ha-svg-icon>
+                                      </md-outlined-icon-button>
+                                      <span class="dpad-center" aria-hidden="true">
+                                          <ha-svg-icon .path=${mdiCircleMedium}></ha-svg-icon>
+                                      </span>
+                                      <md-outlined-icon-button
+                                          ?disabled=${!features.mPan || movement === "moving"}
+                                          title="Pan right (Shift = fine)"
+                                          aria-label="Pan right"
+                                          @click=${handleAsyncEvent((e: MouseEvent) =>
+                                              this._move({ panDelta: this._stepFromEvent(e, 10) }),
+                                          )}
+                                      >
+                                          <ha-svg-icon .path=${mdiArrowRight}></ha-svg-icon>
+                                      </md-outlined-icon-button>
+                                      <span></span>
+                                      <md-outlined-icon-button
+                                          ?disabled=${!features.mTilt || movement === "moving"}
+                                          title="Tilt down (Shift = fine)"
+                                          aria-label="Tilt down"
+                                          @click=${handleAsyncEvent((e: MouseEvent) =>
+                                              this._move({ tiltDelta: this._stepFromEvent(e, -10) }),
+                                          )}
+                                      >
+                                          <ha-svg-icon .path=${mdiArrowDown}></ha-svg-icon>
+                                      </md-outlined-icon-button>
+                                      <span></span>
                                   </div>
-                              `;
-                          })()
-                        : nothing}
-                    ${features.dptz
-                        ? (() => {
-                              const streams = readDptzStreams(this.node, this.endpoint);
-                              return html`<div class="dptz-note">
-                                  Digital PTZ: <b>${streams.length}</b> active stream${streams.length === 1 ? "" : "s"}
-                                  <span class="muted small">(controls available during live view)</span>
-                              </div>`;
-                          })()
-                        : nothing}
+                                  ${
+                                      features.mZoom
+                                          ? html`<div class="zoom-col">
+                                                <md-outlined-icon-button
+                                                    ?disabled=${movement === "moving"}
+                                                    title="Zoom in (Shift = fine)"
+                                                    aria-label="Zoom in"
+                                                    @click=${handleAsyncEvent((e: MouseEvent) =>
+                                                        this._move({ zoomDelta: this._stepFromEvent(e, 10) }),
+                                                    )}
+                                                >
+                                                    <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
+                                                </md-outlined-icon-button>
+                                                <span class="muted small">zoom</span>
+                                                <md-outlined-icon-button
+                                                    ?disabled=${movement === "moving"}
+                                                    title="Zoom out (Shift = fine)"
+                                                    aria-label="Zoom out"
+                                                    @click=${handleAsyncEvent((e: MouseEvent) =>
+                                                        this._move({ zoomDelta: this._stepFromEvent(e, -10) }),
+                                                    )}
+                                                >
+                                                    <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
+                                                </md-outlined-icon-button>
+                                            </div>`
+                                          : nothing
+                                  }
+                              </div>`
+                            : nothing
+                    }
+                    ${this._toast ? html`<div class="toast">${this._toast}</div>` : nothing}
+                    ${
+                        features.mPresets
+                            ? (() => {
+                                  const { items, max } = readPresets(this.node, this.endpoint);
+                                  return html`
+                                      <div class="presets-frame">
+                                          <div class="presets-header">
+                                              <span>Presets</span>
+                                              <span class="muted small">${items.length} / ${max}</span>
+                                          </div>
+                                          <div class="chip-row">
+                                              ${items.map(
+                                                  p => html`<button
+                                                      class="chip"
+                                                      title="p=${this._fmtDeg(p.settings.pan ?? 0)} · t=${this._fmtDeg(
+                                                          p.settings.tilt ?? 0,
+                                                      )} · z=${p.settings.zoom ?? 1}×"
+                                                      @click=${handleAsync(() => this._goPreset(p.presetId))}
+                                                  >
+                                                      ${p.name}
+                                                  </button>`,
+                                              )}
+                                              ${
+                                                  items.length === 0
+                                                      ? html`<span class="muted small">No presets saved.</span>`
+                                                      : nothing
+                                              }
+                                          </div>
+                                          <details class="manager">
+                                              <summary>Manage presets…</summary>
+                                              ${items.map(
+                                                  p => html`<div class="preset-row">
+                                                      <span class="pid">#${p.presetId}</span>
+                                                      <span class="pname">${p.name}</span>
+                                                      <span class="pcoord">
+                                                          p=${this._fmtDeg(p.settings.pan ?? 0)} ·
+                                                          t=${this._fmtDeg(p.settings.tilt ?? 0)} ·
+                                                          z=${p.settings.zoom ?? 1}×
+                                                      </span>
+                                                      <span class="grow"></span>
+                                                      <md-outlined-icon-button
+                                                          title="Overwrite with current MPTZ"
+                                                          @click=${handleAsync(() => this._savePresetUpdate(p.presetId))}
+                                                      >
+                                                          <ha-svg-icon .path=${mdiContentSaveOutline}></ha-svg-icon>
+                                                      </md-outlined-icon-button>
+                                                      <md-outlined-icon-button
+                                                          title="Rename (also overwrites position with current MPTZ)"
+                                                          aria-label="Rename preset"
+                                                          @click=${handleAsync(() =>
+                                                              this._renamePreset(p.presetId, p.name),
+                                                          )}
+                                                      >
+                                                          <ha-svg-icon .path=${mdiPencil}></ha-svg-icon>
+                                                      </md-outlined-icon-button>
+                                                      <md-outlined-icon-button
+                                                          title="Remove"
+                                                          @click=${handleAsync(() =>
+                                                              this._removePreset(p.presetId, p.name),
+                                                          )}
+                                                      >
+                                                          <ha-svg-icon .path=${mdiTrashCan}></ha-svg-icon>
+                                                      </md-outlined-icon-button>
+                                                  </div>`,
+                                              )}
+                                              <div class="add-bar">
+                                                  <input
+                                                      class="add-input"
+                                                      placeholder="New preset name…"
+                                                      .value=${this._newPresetName}
+                                                      @input=${(e: Event) =>
+                                                          (this._newPresetName = (e.target as HTMLInputElement).value)}
+                                                  />
+                                                  <md-outlined-button
+                                                      ?disabled=${!this._newPresetName.trim() || items.length >= max}
+                                                      @click=${handleAsync(() => this._saveNewPreset())}
+                                                  >
+                                                      Save current MPTZ
+                                                  </md-outlined-button>
+                                              </div>
+                                          </details>
+                                      </div>
+                                  `;
+                              })()
+                            : nothing
+                    }
+                    ${
+                        features.dptz
+                            ? (() => {
+                                  const streams = readDptzStreams(this.node, this.endpoint);
+                                  return html`<div class="dptz-note">
+                                      Digital PTZ: <b>${streams.length}</b> active
+                                      stream${streams.length === 1 ? "" : "s"}
+                                      <span class="muted small">(controls available during live view)</span>
+                                  </div>`;
+                              })()
+                            : nothing
+                    }
                 </div>
             </details>
         `;

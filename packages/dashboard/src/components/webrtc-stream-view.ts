@@ -299,28 +299,36 @@ export class WebRtcStreamView extends LitElement {
                 disableremoteplayback
                 ?hidden=${this._state !== "streaming"}
             ></video>
-            ${this._state === "idle"
-                ? html`<div class="placeholder">
-                      <ha-svg-icon class="placeholder-icon" .path=${mdiVideoOutline}></ha-svg-icon>
-                      <div class="placeholder-text">
-                          ${this.liveViewSupported
-                              ? html`Click <b>Start</b> to begin streaming`
-                              : "Live view not supported — use Snapshot"}
-                      </div>
-                  </div>`
-                : null}
-            ${this._state === "connecting"
-                ? html`<div class="placeholder">
-                      <div class="spinner"></div>
-                      <div class="placeholder-text">Connecting…</div>
-                  </div>`
-                : null}
-            ${this._state === "error"
-                ? html`<div class="placeholder error">
-                      <ha-svg-icon class="placeholder-icon" .path=${mdiAlertCircleOutline}></ha-svg-icon>
-                      <div class="placeholder-text">${this._errorMessage ?? "Stream error"}</div>
-                  </div>`
-                : null}
+            ${
+                this._state === "idle"
+                    ? html`<div class="placeholder">
+                          <ha-svg-icon class="placeholder-icon" .path=${mdiVideoOutline}></ha-svg-icon>
+                          <div class="placeholder-text">
+                              ${
+                                  this.liveViewSupported
+                                      ? html`Click <b>Start</b> to begin streaming`
+                                      : "Live view not supported — use Snapshot"
+                              }
+                          </div>
+                      </div>`
+                    : null
+            }
+            ${
+                this._state === "connecting"
+                    ? html`<div class="placeholder">
+                          <div class="spinner"></div>
+                          <div class="placeholder-text">Connecting…</div>
+                      </div>`
+                    : null
+            }
+            ${
+                this._state === "error"
+                    ? html`<div class="placeholder error">
+                          <ha-svg-icon class="placeholder-icon" .path=${mdiAlertCircleOutline}></ha-svg-icon>
+                          <div class="placeholder-text">${this._errorMessage ?? "Stream error"}</div>
+                      </div>`
+                    : null
+            }
         `;
     }
 

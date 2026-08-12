@@ -16,6 +16,7 @@ Custom clusters are used by device manufacturers to expose proprietary functiona
 | `NeoCluster`                        | 0x125dfc11 | Neo (0x125d/4991)          | Power metering                             |
 | `HeimanCluster`                     | 0x120bfc01 | Heiman (0x120b/4619)       | Sensor states, alarms                      |
 | `ThirdRealityMeteringCluster`       | 0x130dfc02 | ThirdReality (0x130d/4877) | Power metering                             |
+| `WagoCluster`                       | 0x1534fc00 | WAGO (0x1534/5428)         | Relay switch input configuration           |
 | `DraftElectricalMeasurementCluster` | 0x00000b04 | Various                    | Draft Matter 1.0 electrical measurement    |
 
 ## Adding a New Custom Cluster
@@ -94,6 +95,31 @@ The annotations also support the following options:
 * `listOf(datatype)`: Use this to declare an attribute to be an array of the given datatype.
 
 More advanced modifier or own datatype definitions can be added on request. Contact us.
+
+## Extending Standard Clusters
+
+Some vendors do not define an entirely new cluster but instead add manufacturer-specific attributes to a standard Matter cluster, using vendor-prefixed attribute IDs (vendor ID in the upper 16 bits of the attribute ID).
+
+Such extensions are defined in `src/extensions/` using the `clusterExtension()` helper, which adds the attributes to the standard cluster in the matter.js model. One file per extended cluster, named after that cluster, holds the attributes of all vendors, so that colliding attribute IDs or names are visible in one place:
+
+```typescript
+import { WindowCovering } from "@matter/main/clusters/window-covering";
+import { clusterExtension } from "./extension.js";
+
+clusterExtension(WindowCovering.id, [
+    {
+        id: 0x15340001,
+        name: "MyVendorTravelTime",
+        type: "uint32",
+        access: "RW VM",
+        details: "Description of the attribute.",
+    },
+]);
+```
+
+Conformance is not declared: extension attributes are always optional (`O`).
+
+Prefix attribute names with the vendor name to avoid collisions with standard attributes. New cluster files must be imported from `src/extensions/index.ts`.
 
 ## Registration
 

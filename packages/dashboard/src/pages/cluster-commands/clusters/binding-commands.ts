@@ -13,7 +13,7 @@ import "../../../components/ha-svg-icon.js";
 import { clusters } from "../../../client/models/descriptions.js";
 import { showAlertDialog, showPromptDialog } from "../../../components/dialog-box/show-dialog-box.js";
 import {
-    deleteBindingAtIndex,
+    deleteBinding,
     ensureBindingAcl,
     fixOverPrivilegedBindingAcl,
 } from "../../../components/dialogs/binding/binding-actions.js";
@@ -21,13 +21,13 @@ import type { BindingEntryStruct } from "../../../components/dialogs/binding/mod
 import { showNodeBindingDialog } from "../../../components/dialogs/binding/show-node-binding-dialog.js";
 import { nodeIdKey } from "../../../util/access-control.js";
 import { handleAsync } from "../../../util/async-handler.js";
-import { readBindings, reverseAclState, type ReverseAclState } from "../../../util/binding.js";
+import { BINDING_CLUSTER_ID, readOurBindings, reverseAclState, type ReverseAclState } from "../../../util/binding.js";
 import { getEndpointDeviceTypes } from "../../../util/endpoints.js";
 import { getDeviceName } from "../../../util/node-name.js";
 import { BaseClusterCommands } from "../base-cluster-commands.js";
 import { registerClusterCommands } from "../registry.js";
 
-const CLUSTER_ID = 30;
+const CLUSTER_ID = BINDING_CLUSTER_ID;
 
 @customElement("binding-cluster-commands")
 class BindingClusterCommands extends BaseClusterCommands {
@@ -48,7 +48,7 @@ class BindingClusterCommands extends BaseClusterCommands {
         this._unsubscribe?.();
     }
 
-    /** Read the (fabric-scoped) binding attribute and each target's ACL into the cache on open. */
+    /** Read the binding attribute and each target's ACL into the cache on open. */
     private async _ensureLoaded() {
         if (!this.client || !this.node || !this.node.available || this.endpoint === undefined) return;
         const node = this.node;
@@ -57,9 +57,9 @@ class BindingClusterCommands extends BaseClusterCommands {
         if (this._loadedKey === key) return;
         this._loadedKey = key;
         try {
-            await this._readInto(node.node_id, [`${endpoint}/30/0`, "0/62/5"]);
+            await this._readInto(node.node_id, [`${endpoint}/${CLUSTER_ID}/0`, "0/62/5"]);
             const targets = new Set(
-                readBindings(node, endpoint)
+                readOurBindings(node, endpoint)
                     .map(b => (b.node != null ? nodeIdKey(b.node) : undefined))
                     .filter((k): k is string => k !== undefined),
             );
@@ -76,8 +76,13 @@ class BindingClusterCommands extends BaseClusterCommands {
         }
     }
 
+    /**
+     * Fabric-filtered so the merged values match what the subscription caches: matter.js only feeds
+     * a one-shot read back into the datasource when its filtering matches the subscription's, so an
+     * unfiltered response would put other fabrics' entries into the cache and nothing would clear them.
+     */
     private async _readInto(nodeId: number | bigint, path: string | string[]) {
-        const res = await this.client.readAttribute(nodeId, path);
+        const res = await this.client.readAttribute(nodeId, path, undefined, true);
         const node = this.client.nodes[nodeIdKey(nodeId)];
         if (node) for (const [k, v] of Object.entries(res)) node.attributes[k] = v;
     }
@@ -103,13 +108,15 @@ class BindingClusterCommands extends BaseClusterCommands {
         } catch (err) {
             if (this.isSameContext(node, endpoint)) {
                 await showAlertDialog({ title: failTitle, text: err instanceof Error ? err.message : String(err) });
+            } else {
+                console.error(failTitle, err);
             }
         } finally {
             this._busy = false;
         }
     }
 
-    private async _delete(index: number) {
+    private async _delete(binding: BindingEntryStruct) {
         const node = this.node;
         const endpoint = this.endpoint;
         const confirmed = await showPromptDialog({
@@ -118,12 +125,7 @@ class BindingClusterCommands extends BaseClusterCommands {
             confirmText: "Remove",
         });
         if (!confirmed || !this.isSameContext(node, endpoint)) return;
-        await this._run(
-            node,
-            endpoint,
-            () => deleteBindingAtIndex(this.client, node, endpoint, index),
-            "Delete failed",
-        );
+        await this._run(node, endpoint, () => deleteBinding(this.client, node, endpoint, binding), "Delete failed");
     }
 
     private async _fixAcl(b: BindingEntryStruct, mode: "missing" | "overPrivileged") {
@@ -143,28 +145,30 @@ class BindingClusterCommands extends BaseClusterCommands {
 
     override render() {
         if (!this.node || this.cluster !== CLUSTER_ID) return nothing;
-        const bindings = readBindings(this.node, this.endpoint);
+        const bindings = readOurBindings(this.node, this.endpoint);
 
         return html`
             <details class="command-panel">
                 <summary>Bindings (${bindings.length})</summary>
                 <div class="command-content">
-                    ${bindings.length === 0
-                        ? html`<div class="empty">No bindings on this endpoint.</div>`
-                        : html`<table class="bt">
-                              <thead>
-                                  <tr>
-                                      <th>Target node</th>
-                                      <th>Endpoint</th>
-                                      <th>Cluster</th>
-                                      <th>ACL on target</th>
-                                      <th></th>
-                                  </tr>
-                              </thead>
-                              <tbody>
-                                  ${bindings.map((b, i) => this._row(b, i))}
-                              </tbody>
-                          </table>`}
+                    ${
+                        bindings.length === 0
+                            ? html`<div class="empty">No bindings on this endpoint.</div>`
+                            : html`<table class="bt">
+                                  <thead>
+                                      <tr>
+                                          <th>Target node</th>
+                                          <th>Endpoint</th>
+                                          <th>Cluster</th>
+                                          <th>ACL on target</th>
+                                          <th></th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>
+                                      ${bindings.map(b => this._row(b))}
+                                  </tbody>
+                              </table>`
+                    }
                     <md-outlined-button
                         ?disabled=${this._busy || !this.node.available}
                         @click=${handleAsync(() => this._openAdd())}
@@ -175,7 +179,7 @@ class BindingClusterCommands extends BaseClusterCommands {
         `;
     }
 
-    private _row(b: BindingEntryStruct, index: number): TemplateResult {
+    private _row(b: BindingEntryStruct): TemplateResult {
         const target = this._targetNode(b.node);
         const aclState: ReverseAclState =
             b.node == null ? "cannotVerify" : reverseAclState(this.node.node_id, b, target).state;
@@ -187,9 +191,9 @@ class BindingClusterCommands extends BaseClusterCommands {
             <tr>
                 <td>
                     <span class="ident"
-                        ><b>${name}</b>${b.node != null
-                            ? html` · <span class="nid">${b.node.toString()}</span>`
-                            : nothing}</span
+                        ><b>${name}</b>${
+                            b.node != null ? html` · <span class="nid">${b.node.toString()}</span>` : nothing
+                        }</span
                     >
                 </td>
                 <td>${endpointText}</td>
@@ -199,7 +203,7 @@ class BindingClusterCommands extends BaseClusterCommands {
                     <md-outlined-button
                         class="danger"
                         ?disabled=${this._busy || !this.node.available}
-                        @click=${handleAsync(() => this._delete(index))}
+                        @click=${handleAsync(() => this._delete(b))}
                     >
                         <ha-svg-icon .path=${mdiTrashCan} slot="icon"></ha-svg-icon>delete
                     </md-outlined-button>
@@ -281,7 +285,7 @@ class BindingClusterCommands extends BaseClusterCommands {
     ];
 }
 
-registerClusterCommands(CLUSTER_ID, "binding-cluster-commands");
+registerClusterCommands(CLUSTER_ID, "binding-cluster-commands", { renderWhenOffline: true });
 
 declare global {
     interface HTMLElementTagNameMap {

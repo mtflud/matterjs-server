@@ -176,19 +176,21 @@ export class NodeAclAddDialog extends LitElement {
 
                         <div class="label">Subjects (nodes)</div>
                         <div class="chips">
-                            ${this._subjects.length === 0
-                                ? html`<span class="mut">none — add at least one</span>`
-                                : this._subjects.map(s => {
-                                      const known = this.client.nodes[nodeIdKey(s)];
-                                      return html`<span class="chip"
-                                          >${known ? getDeviceName(known) : "Node"} · ${s.toString()}
-                                          <ha-svg-icon
-                                              class="x"
-                                              .path=${mdiClose}
-                                              @click=${() => this._removeSubject(nodeIdKey(s))}
-                                          ></ha-svg-icon
-                                      ></span>`;
-                                  })}
+                            ${
+                                this._subjects.length === 0
+                                    ? html`<span class="mut">none — add at least one</span>`
+                                    : this._subjects.map(s => {
+                                          const known = this.client.nodes[nodeIdKey(s)];
+                                          return html`<span class="chip"
+                                              >${known ? getDeviceName(known) : "Node"} · ${s.toString()}
+                                              <ha-svg-icon
+                                                  class="x"
+                                                  .path=${mdiClose}
+                                                  @click=${() => this._removeSubject(nodeIdKey(s))}
+                                              ></ha-svg-icon
+                                          ></span>`;
+                                      })
+                            }
                         </div>
                         <div class="row">
                             <md-outlined-select
@@ -224,22 +226,26 @@ export class NodeAclAddDialog extends LitElement {
 
                         <div class="label">Targets (optional — none means whole node)</div>
                         <div class="chips">
-                            ${this._targets.length === 0
-                                ? html`<span class="mut">whole node</span>`
-                                : this._targets.map(
-                                      (t, i) =>
-                                          html`<span class="chip"
-                                              >${t.endpoint != null ? `EP ${t.endpoint}` : "All endpoints"}
-                                              ${t.cluster != null
-                                                  ? `· ${this._clusterLabel(t.cluster)}`
-                                                  : "· all clusters"}
-                                              <ha-svg-icon
-                                                  class="x"
-                                                  .path=${mdiClose}
-                                                  @click=${() => this._removeTarget(i)}
-                                              ></ha-svg-icon
-                                          ></span>`,
-                                  )}
+                            ${
+                                this._targets.length === 0
+                                    ? html`<span class="mut">whole node</span>`
+                                    : this._targets.map(
+                                          (t, i) =>
+                                              html`<span class="chip"
+                                                  >${t.endpoint != null ? `EP ${t.endpoint}` : "All endpoints"}
+                                                  ${
+                                                      t.cluster != null
+                                                          ? `· ${this._clusterLabel(t.cluster)}`
+                                                          : "· all clusters"
+                                                  }
+                                                  <ha-svg-icon
+                                                      class="x"
+                                                      .path=${mdiClose}
+                                                      @click=${() => this._removeTarget(i)}
+                                                  ></ha-svg-icon
+                                              ></span>`,
+                                      )
+                            }
                         </div>
                         <div class="row">
                             <md-outlined-select

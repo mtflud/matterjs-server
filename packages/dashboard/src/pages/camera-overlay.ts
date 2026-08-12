@@ -297,147 +297,180 @@ export class CameraOverlay extends LitElement {
                     </md-icon-button>
                     <span>Node ${this.nodeId} • Endpoint ${this.endpointId}</span>
                 </header>
-                ${this._avsumPresent()
-                    ? html`<avsum-ptz-strip
-                          .nodeId=${this.nodeId}
-                          .endpointId=${this.endpointId}
-                          .activeVideoStreamId=${this._activeVideoStreamId}
-                          .sensorSize=${this._getSensorSize()}
-                      ></avsum-ptz-strip>`
-                    : nothing}
-                <main>
-                    ${this.client
-                        ? html`<webrtc-stream-view
-                              ${ref(this._streamViewRef)}
+                ${
+                    this._avsumPresent()
+                        ? html`<avsum-ptz-strip
                               .nodeId=${this.nodeId}
                               .endpointId=${this.endpointId}
-                              .liveViewSupported=${liveViewSupported}
-                              .resolution=${this._selectedResolution}
-                              .watermarkEnabled=${this._watermarkEnabled}
-                              .osdEnabled=${this._osdEnabled}
-                              .snapshotResolution=${this._selectedSnapshotResolution}
-                              @streamstate=${this._onStreamState}
-                          ></webrtc-stream-view>`
-                        : html`<div class="status error">No Matter client available.</div>`}
-                    ${this._snapshotDataUri
-                        ? html`
-                              <div class="snapshot-preview">
-                                  <img
-                                      src=${this._snapshotDataUri}
-                                      @click=${this._downloadSnapshot}
-                                      title="Click to download${this._snapshotResolution
-                                          ? ` (${this._snapshotResolution.width}×${this._snapshotResolution.height})`
-                                          : ""}"
-                                      alt="Snapshot"
-                                  />
-                                  <md-icon-button
-                                      @click=${() => {
-                                          this._snapshotDataUri = null;
-                                      }}
-                                      aria-label="Close snapshot"
-                                  >
-                                      <ha-svg-icon .path=${mdiClose}></ha-svg-icon>
-                                  </md-icon-button>
-                              </div>
-                          `
-                        : nothing}
+                              .activeVideoStreamId=${this._activeVideoStreamId}
+                              .sensorSize=${this._getSensorSize()}
+                          ></avsum-ptz-strip>`
+                        : nothing
+                }
+                <main>
+                    ${
+                        this.client
+                            ? html`<webrtc-stream-view
+                                  ${ref(this._streamViewRef)}
+                                  .nodeId=${this.nodeId}
+                                  .endpointId=${this.endpointId}
+                                  .liveViewSupported=${liveViewSupported}
+                                  .resolution=${this._selectedResolution}
+                                  .watermarkEnabled=${this._watermarkEnabled}
+                                  .osdEnabled=${this._osdEnabled}
+                                  .snapshotResolution=${this._selectedSnapshotResolution}
+                                  @streamstate=${this._onStreamState}
+                              ></webrtc-stream-view>`
+                            : html`<div class="status error">No Matter client available.</div>`
+                    }
+                    ${
+                        this._snapshotDataUri
+                            ? html`
+                                  <div class="snapshot-preview">
+                                      <img
+                                          src=${this._snapshotDataUri}
+                                          @click=${this._downloadSnapshot}
+                                          title="Click to download${
+                                              this._snapshotResolution
+                                                  ? ` (${this._snapshotResolution.width}×${this._snapshotResolution.height})`
+                                                  : ""
+                                          }"
+                                          alt="Snapshot"
+                                      />
+                                      <md-icon-button
+                                          @click=${() => {
+                                              this._snapshotDataUri = null;
+                                          }}
+                                          aria-label="Close snapshot"
+                                      >
+                                          <ha-svg-icon .path=${mdiClose}></ha-svg-icon>
+                                      </md-icon-button>
+                                  </div>
+                              `
+                            : nothing
+                    }
                     ${this._snapshotError ? html`<div class="snapshot-error">${this._snapshotError}</div>` : nothing}
                 </main>
                 <footer>
                     ${this._closing ? html`<span class="footer-status">Closing…</span>` : nothing}
-                    ${!this._closing && this._state === "connecting"
-                        ? html`<span class="footer-status">Waiting for camera response…</span>`
-                        : nothing}
-                    ${!this._closing && this._state === "error" && this._errorMessage
-                        ? html`<span class="footer-status error">${this._errorMessage}</span>`
-                        : nothing}
-                    ${canStart && this._resolutions.length > 0
-                        ? html`
-                              <md-outlined-select
-                                  label="Resolution"
-                                  .value=${this._selectedResolution
-                                      ? `${this._selectedResolution.width}x${this._selectedResolution.height}`
-                                      : ""}
-                                  @change=${this._onResolutionChange}
+                    ${
+                        !this._closing && this._state === "connecting"
+                            ? html`<span class="footer-status">Waiting for camera response…</span>`
+                            : nothing
+                    }
+                    ${
+                        !this._closing && this._state === "error" && this._errorMessage
+                            ? html`<span class="footer-status error">${this._errorMessage}</span>`
+                            : nothing
+                    }
+                    ${
+                        canStart && this._resolutions.length > 0
+                            ? html`
+                                  <md-outlined-select
+                                      label="Resolution"
+                                      .value=${
+                                          this._selectedResolution
+                                              ? `${this._selectedResolution.width}x${this._selectedResolution.height}`
+                                              : ""
+                                      }
+                                      @change=${this._onResolutionChange}
+                                  >
+                                      ${this._resolutions.map(
+                                          r => html`
+                                              <md-select-option value=${`${r.width}x${r.height}`}>
+                                                  <div slot="headline">${r.width}×${r.height}</div>
+                                              </md-select-option>
+                                          `,
+                                      )}
+                                  </md-outlined-select>
+                              `
+                            : nothing
+                    }
+                    ${
+                        idleOrError && this._snapshotSupported && this._snapshotResolutions.length > 0
+                            ? html`
+                                  <md-outlined-select
+                                      label="Snapshot"
+                                      .value=${
+                                          this._selectedSnapshotResolution
+                                              ? `${this._selectedSnapshotResolution.width}x${this._selectedSnapshotResolution.height}`
+                                              : ""
+                                      }
+                                      @change=${this._onSnapshotResolutionChange}
+                                  >
+                                      ${this._snapshotResolutions.map(
+                                          r => html`
+                                              <md-select-option value=${`${r.width}x${r.height}`}>
+                                                  <div slot="headline">${r.width}×${r.height}</div>
+                                              </md-select-option>
+                                          `,
+                                      )}
+                                  </md-outlined-select>
+                              `
+                            : nothing
+                    }
+                    ${
+                        canStart && this._avsmFeatures().wmark
+                            ? html`<label class="overlay-toggle">
+                                  <input
+                                      type="checkbox"
+                                      ?checked=${this._watermarkEnabled}
+                                      @change=${(e: Event) =>
+                                          (this._watermarkEnabled = (e.target as HTMLInputElement).checked)}
+                                  />
+                                  Watermark
+                              </label>`
+                            : nothing
+                    }
+                    ${
+                        canStart && this._avsmFeatures().osd
+                            ? html`<label class="overlay-toggle">
+                                  <input
+                                      type="checkbox"
+                                      ?checked=${this._osdEnabled}
+                                      @change=${(e: Event) => (this._osdEnabled = (e.target as HTMLInputElement).checked)}
+                                  />
+                                  OSD
+                              </label>`
+                            : nothing
+                    }
+                    ${
+                        canStart
+                            ? html`<md-filled-button
+                                  @click=${this._start}
+                                  ?disabled=${!this.client || this._resolutionsLoading}
                               >
-                                  ${this._resolutions.map(
-                                      r => html`
-                                          <md-select-option value=${`${r.width}x${r.height}`}>
-                                              <div slot="headline">${r.width}×${r.height}</div>
-                                          </md-select-option>
-                                      `,
-                                  )}
-                              </md-outlined-select>
-                          `
-                        : nothing}
-                    ${idleOrError && this._snapshotSupported && this._snapshotResolutions.length > 0
-                        ? html`
-                              <md-outlined-select
-                                  label="Snapshot"
-                                  .value=${this._selectedSnapshotResolution
-                                      ? `${this._selectedSnapshotResolution.width}x${this._selectedSnapshotResolution.height}`
-                                      : ""}
-                                  @change=${this._onSnapshotResolutionChange}
+                                  ${this._state === "error" ? "Retry" : "Start"}
+                              </md-filled-button>`
+                            : nothing
+                    }
+                    ${
+                        this._state === "streaming"
+                            ? html`<md-filled-button @click=${this._stop}>End</md-filled-button>
+                                  <md-text-button
+                                      @click=${this._toggleMute}
+                                      aria-label=${this._muted ? "Unmute" : "Mute"}
+                                  >
+                                      <ha-svg-icon
+                                          slot="icon"
+                                          .path=${this._muted ? mdiVolumeOff : mdiVolumeHigh}
+                                      ></ha-svg-icon>
+                                      ${this._muted ? "Unmute" : "Mute"}
+                                  </md-text-button>`
+                            : nothing
+                    }
+                    ${
+                        this._snapshotSupported
+                            ? html`<md-text-button
+                                  @click=${this._onSnapshot}
+                                  ?disabled=${this._snapshotBusy || !this.client}
+                                  aria-label="Take snapshot"
                               >
-                                  ${this._snapshotResolutions.map(
-                                      r => html`
-                                          <md-select-option value=${`${r.width}x${r.height}`}>
-                                              <div slot="headline">${r.width}×${r.height}</div>
-                                          </md-select-option>
-                                      `,
-                                  )}
-                              </md-outlined-select>
-                          `
-                        : nothing}
-                    ${canStart && this._avsmFeatures().wmark
-                        ? html`<label class="overlay-toggle">
-                              <input
-                                  type="checkbox"
-                                  ?checked=${this._watermarkEnabled}
-                                  @change=${(e: Event) =>
-                                      (this._watermarkEnabled = (e.target as HTMLInputElement).checked)}
-                              />
-                              Watermark
-                          </label>`
-                        : nothing}
-                    ${canStart && this._avsmFeatures().osd
-                        ? html`<label class="overlay-toggle">
-                              <input
-                                  type="checkbox"
-                                  ?checked=${this._osdEnabled}
-                                  @change=${(e: Event) => (this._osdEnabled = (e.target as HTMLInputElement).checked)}
-                              />
-                              OSD
-                          </label>`
-                        : nothing}
-                    ${canStart
-                        ? html`<md-filled-button
-                              @click=${this._start}
-                              ?disabled=${!this.client || this._resolutionsLoading}
-                          >
-                              ${this._state === "error" ? "Retry" : "Start"}
-                          </md-filled-button>`
-                        : nothing}
-                    ${this._state === "streaming"
-                        ? html`<md-filled-button @click=${this._stop}>End</md-filled-button>
-                              <md-text-button @click=${this._toggleMute} aria-label=${this._muted ? "Unmute" : "Mute"}>
-                                  <ha-svg-icon
-                                      slot="icon"
-                                      .path=${this._muted ? mdiVolumeOff : mdiVolumeHigh}
-                                  ></ha-svg-icon>
-                                  ${this._muted ? "Unmute" : "Mute"}
+                                  <ha-svg-icon .path=${mdiCamera} slot="icon"></ha-svg-icon>
+                                  ${this._snapshotBusy ? "Capturing…" : "Snapshot"}
                               </md-text-button>`
-                        : nothing}
-                    ${this._snapshotSupported
-                        ? html`<md-text-button
-                              @click=${this._onSnapshot}
-                              ?disabled=${this._snapshotBusy || !this.client}
-                              aria-label="Take snapshot"
-                          >
-                              <ha-svg-icon .path=${mdiCamera} slot="icon"></ha-svg-icon>
-                              ${this._snapshotBusy ? "Capturing…" : "Snapshot"}
-                          </md-text-button>`
-                        : nothing}
+                            : nothing
+                    }
                     <md-text-button @click=${this._close} ?disabled=${this._closing}>Close</md-text-button>
                 </footer>
             </div>

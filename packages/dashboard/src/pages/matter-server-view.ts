@@ -105,15 +105,17 @@ class MatterServerView extends LitElement {
                                         )})</span
                                     >
                                     ${node.available ? "" : html` <span class="status">OFFLINE</span>`}
-                                    ${badge
-                                        ? html`<a
-                                              class="icd-badge icd-${badge.state}"
-                                              href="#node/${node.node_id}/0/${ICD_CLUSTER_ID}"
-                                              title=${badge.hint}
-                                              @click=${(e: Event) => e.stopPropagation()}
-                                              >ICD</a
-                                          >`
-                                        : ""}
+                                    ${
+                                        badge
+                                            ? html`<a
+                                                  class="icd-badge icd-${badge.state}"
+                                                  href="#node/${node.node_id}/0/${ICD_CLUSTER_ID}"
+                                                  title=${badge.hint}
+                                                  @click=${(e: Event) => e.stopPropagation()}
+                                                  >ICD</a
+                                              >`
+                                            : ""
+                                    }
                                 </div>
                                 <div slot="supporting-text">
                                     ${node.nodeLabel ? `${node.nodeLabel} | ` : nothing} ${node.vendorName} |

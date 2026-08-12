@@ -176,46 +176,56 @@ export class NetworkDetails extends LitElement {
         return html`
             <div class="section">
                 <h4>WiFi Network</h4>
-                ${wifiDiag.bssid
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">BSSID:</span>
-                              <span class="value mono">${wifiDiag.bssid}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${wifiDiag.rssi !== null
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Signal:</span>
-                              <span class="value" style="color: ${signalColor}">${wifiDiag.rssi} dBm</span>
-                          </div>
-                      `
-                    : nothing}
-                ${wifiDiag.channel !== null
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Channel:</span>
-                              <span class="value">${wifiDiag.channel}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${wifiDiag.securityType !== null
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Security:</span>
-                              <span class="value">${getWiFiSecurityTypeName(wifiDiag.securityType)}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${wifiDiag.wifiVersion !== null
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">WiFi version:</span>
-                              <span class="value">${getWiFiVersionName(wifiDiag.wifiVersion)}</span>
-                          </div>
-                      `
-                    : nothing}
+                ${
+                    wifiDiag.bssid
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">BSSID:</span>
+                                  <span class="value mono">${wifiDiag.bssid}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    wifiDiag.rssi !== null
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Signal:</span>
+                                  <span class="value" style="color: ${signalColor}">${wifiDiag.rssi} dBm</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    wifiDiag.channel !== null
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Channel:</span>
+                                  <span class="value">${wifiDiag.channel}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    wifiDiag.securityType !== null
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Security:</span>
+                                  <span class="value">${getWiFiSecurityTypeName(wifiDiag.securityType)}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    wifiDiag.wifiVersion !== null
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">WiFi version:</span>
+                                  <span class="value">${getWiFiVersionName(wifiDiag.wifiVersion)}</span>
+                              </div>
+                          `
+                        : nothing
+                }
             </div>
         `;
     }
@@ -242,30 +252,36 @@ export class NetworkDetails extends LitElement {
                     <span class="value">${getThreadRoleName(threadRole)}</span>
                 </div>
                 <p class="hint-text inline-note">${getThreadRoleDescription(threadRole)}</p>
-                ${threadVersion !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Thread version:</span>
-                              <span class="value">${formatThreadVersion(threadVersion)}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${channel !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Channel:</span>
-                              <span class="value">${channel}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${extAddressHex
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Extended address:</span>
-                              <span class="value mono">${extAddressHex}</span>
-                          </div>
-                      `
-                    : nothing}
+                ${
+                    threadVersion !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Thread version:</span>
+                                  <span class="value">${formatThreadVersion(threadVersion)}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    channel !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Channel:</span>
+                                  <span class="value">${channel}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    extAddressHex
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Extended address:</span>
+                                  <span class="value mono">${extAddressHex}</span>
+                              </div>
+                          `
+                        : nothing
+                }
                 <div class="info-row">
                     <span class="label">Direct neighbors:</span>
                     <span class="value">${connections.length}</span>
@@ -283,86 +299,98 @@ export class NetworkDetails extends LitElement {
                 })()}
             </div>
 
-            ${connections.length > 0
-                ? html`
-                      <md-divider></md-divider>
-                      <div class="section">
-                          <h4>Connections (${connections.length})</h4>
-                          <div class="neighbors-list">
-                              ${connections
-                                  .toSorted((a, b) => {
-                                      const score = (conn: NodeConnection): number => {
-                                          if (conn.rssi !== null && conn.rssi !== undefined) {
-                                              return conn.rssi;
-                                          }
-                                          if (conn.lqi !== null && conn.lqi !== undefined) {
-                                              return conn.lqi;
-                                          }
-                                          return -Infinity;
-                                      };
-                                      return score(b) - score(a);
-                                  })
-                                  .map((conn: NodeConnection) => {
-                                      return html`
-                                          <div
-                                              class="neighbor-item clickable"
-                                              role="button"
-                                              tabindex="0"
-                                              @click=${() => this._handleSelectNode(conn.connectedNodeId)}
-                                              @keydown=${(e: KeyboardEvent) =>
-                                                  this._handleKeyDown(e, conn.connectedNodeId)}
-                                          >
-                                              <ha-svg-icon
-                                                  .path=${this._getSignalIcon(conn.signalLevel)}
-                                                  style="--icon-primary-color: ${conn.signalColor}"
-                                              ></ha-svg-icon>
-                                              <div class="neighbor-info">
-                                                  <div class="neighbor-name">
-                                                      ${conn.connectedNode
-                                                          ? html`Node ${conn.connectedNodeId}
-                                                                <span class="node-id-hex"
-                                                                    >${this._formatNodeIdHex(
-                                                                        conn.connectedNodeId,
-                                                                    )}</span
-                                                                >: ${getDeviceName(conn.connectedNode)}`
-                                                          : this._getExternalDeviceLabel(conn)}
-                                                  </div>
-                                                  <div class="neighbor-signal">
-                                                      ${conn.rssi !== null
-                                                          ? html`RSSI: ${conn.rssi} dBm`
-                                                          : nothing}${conn.rssi !== null && conn.lqi !== null
-                                                          ? ", "
-                                                          : nothing}${conn.lqi !== null
-                                                          ? html`LQI: ${conn.lqi}`
-                                                          : nothing}${conn.bidirectionalLqi !== undefined
-                                                          ? html`<span class="route-info"
-                                                                >, Bidir: ${conn.bidirectionalLqi}</span
-                                                            >`
-                                                          : nothing}${conn.pathCost !== undefined
-                                                          ? html`<span class="route-info"
-                                                                >, Cost: ${conn.pathCost}</span
-                                                            >`
-                                                          : nothing}
-                                                      ${conn.isReverseOnly
-                                                          ? html`
-                                                                <span
-                                                                    class="direction-hint reverse-only"
-                                                                    title="Peer reports this node but this node has no matching neighbor-table entry. Possible one-way visibility (range, TX power, or stale neighbor table)."
-                                                                    >← one-way</span
-                                                                >
-                                                            `
-                                                          : !conn.isOutgoing
-                                                            ? html` <span class="direction-hint">(reverse)</span> `
-                                                            : nothing}
+            ${
+                connections.length > 0
+                    ? html`
+                          <md-divider></md-divider>
+                          <div class="section">
+                              <h4>Connections (${connections.length})</h4>
+                              <div class="neighbors-list">
+                                  ${connections
+                                      .toSorted((a, b) => {
+                                          const score = (conn: NodeConnection): number => {
+                                              if (conn.rssi !== null && conn.rssi !== undefined) {
+                                                  return conn.rssi;
+                                              }
+                                              if (conn.lqi !== null && conn.lqi !== undefined) {
+                                                  return conn.lqi;
+                                              }
+                                              return -Infinity;
+                                          };
+                                          return score(b) - score(a);
+                                      })
+                                      .map((conn: NodeConnection) => {
+                                          return html`
+                                              <div
+                                                  class="neighbor-item clickable"
+                                                  role="button"
+                                                  tabindex="0"
+                                                  @click=${() => this._handleSelectNode(conn.connectedNodeId)}
+                                                  @keydown=${(e: KeyboardEvent) =>
+                                                      this._handleKeyDown(e, conn.connectedNodeId)}
+                                              >
+                                                  <ha-svg-icon
+                                                      .path=${this._getSignalIcon(conn.signalLevel)}
+                                                      style="--icon-primary-color: ${conn.signalColor}"
+                                                  ></ha-svg-icon>
+                                                  <div class="neighbor-info">
+                                                      <div class="neighbor-name">
+                                                          ${
+                                                              conn.connectedNode
+                                                                  ? html`Node ${conn.connectedNodeId}
+                                                                        <span class="node-id-hex"
+                                                                            >${this._formatNodeIdHex(
+                                                                                conn.connectedNodeId,
+                                                                            )}</span
+                                                                        >: ${getDeviceName(conn.connectedNode)}`
+                                                                  : this._getExternalDeviceLabel(conn)
+                                                          }
+                                                      </div>
+                                                      <div class="neighbor-signal">
+                                                          ${
+                                                              conn.rssi !== null
+                                                                  ? html`RSSI: ${conn.rssi} dBm`
+                                                                  : nothing
+                                                          }${conn.rssi !== null && conn.lqi !== null ? ", " : nothing}${
+                                                              conn.lqi !== null ? html`LQI: ${conn.lqi}` : nothing
+                                                          }${
+                                                              conn.bidirectionalLqi !== undefined
+                                                                  ? html`<span class="route-info"
+                                                                        >, Bidir: ${conn.bidirectionalLqi}</span
+                                                                    >`
+                                                                  : nothing
+                                                          }${
+                                                              conn.pathCost !== undefined
+                                                                  ? html`<span class="route-info"
+                                                                        >, Cost: ${conn.pathCost}</span
+                                                                    >`
+                                                                  : nothing
+                                                          }
+                                                          ${
+                                                              conn.isReverseOnly
+                                                                  ? html`
+                                                                        <span
+                                                                            class="direction-hint reverse-only"
+                                                                            title="Peer reports this node but this node has no matching neighbor-table entry. Possible one-way visibility (range, TX power, or stale neighbor table)."
+                                                                            >← one-way</span
+                                                                        >
+                                                                    `
+                                                                  : !conn.isOutgoing
+                                                                    ? html`
+                                                                          <span class="direction-hint">(reverse)</span>
+                                                                      `
+                                                                    : nothing
+                                                          }
+                                                      </div>
                                                   </div>
                                               </div>
-                                          </div>
-                                      `;
-                                  })}
+                                          `;
+                                      })}
+                              </div>
                           </div>
-                      </div>
-                  `
-                : nothing}
+                      `
+                    : nothing
+            }
         `;
     }
 
@@ -384,14 +412,16 @@ export class NetworkDetails extends LitElement {
                     <span class="label">Product:</span>
                     <span class="value">${node.productName ?? "Unknown"}</span>
                 </div>
-                ${node.serialNumber
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Serial:</span>
-                              <span class="value mono">${node.serialNumber}</span>
-                          </div>
-                      `
-                    : nothing}
+                ${
+                    node.serialNumber
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Serial:</span>
+                                  <span class="value mono">${node.serialNumber}</span>
+                              </div>
+                          `
+                        : nothing
+                }
                 <div class="info-row">
                     <span class="label">Network:</span>
                     <span class="value">${networkType.charAt(0).toUpperCase() + networkType.slice(1)}</span>
@@ -404,18 +434,22 @@ export class NetworkDetails extends LitElement {
                 </div>
             </div>
 
-            ${networkType === "thread"
-                ? html`
-                      <md-divider></md-divider>
-                      ${this._renderThreadInfo(node)} ${this._renderNodeDiagnostics(node)}
-                  `
-                : nothing}
-            ${networkType === "wifi"
-                ? html`
-                      <md-divider></md-divider>
-                      ${this._renderWiFiInfo(node)}
-                  `
-                : nothing}
+            ${
+                networkType === "thread"
+                    ? html`
+                          <md-divider></md-divider>
+                          ${this._renderThreadInfo(node)} ${this._renderNodeDiagnostics(node)}
+                      `
+                    : nothing
+            }
+            ${
+                networkType === "wifi"
+                    ? html`
+                          <md-divider></md-divider>
+                          ${this._renderWiFiInfo(node)}
+                      `
+                    : nothing
+            }
         `;
     }
 
@@ -459,30 +493,36 @@ export class NetworkDetails extends LitElement {
                     <span class="label">Role:</span>
                     <span class="value">${isRouter ? "Router" : "End Device"}</span>
                 </div>
-                ${extMac !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Extended address:</span>
-                              <span class="value mono">${extMac}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${rlocHex !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">RLOC16:</span>
-                              <span class="value mono">${rlocHex}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${extPanId !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Extended PAN ID:</span>
-                              <span class="value mono">${extPanId}</span>
-                          </div>
-                      `
-                    : nothing}
+                ${
+                    extMac !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Extended address:</span>
+                                  <span class="value mono">${extMac}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    rlocHex !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">RLOC16:</span>
+                                  <span class="value mono">${rlocHex}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    extPanId !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Extended PAN ID:</span>
+                                  <span class="value mono">${extPanId}</span>
+                              </div>
+                          `
+                        : nothing
+                }
             </div>
 
             <md-divider></md-divider>
@@ -506,37 +546,45 @@ export class NetworkDetails extends LitElement {
                     <span class="label">Type:</span>
                     <span class="value">${unknown.isRouter ? "Router (external)" : "End Device (external)"}</span>
                 </div>
-                ${unknown.isRouter
-                    ? html`<p class="hint-text inline-note">${EXTERNAL_ROUTER_CAPABLE_NOTE}</p>`
-                    : nothing}
+                ${
+                    unknown.isRouter
+                        ? html`<p class="hint-text inline-note">${EXTERNAL_ROUTER_CAPABLE_NOTE}</p>`
+                        : nothing
+                }
                 <div class="info-row">
                     <span class="label">Extended address:</span>
                     <span class="value mono">${unknown.extAddressHex}</span>
                 </div>
-                ${unknown.networkName !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Thread network:</span>
-                              <span class="value">${unknown.networkName}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${unknown.extendedPanIdHex !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Extended PAN ID:</span>
-                              <span class="value mono">${unknown.extendedPanIdHex}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${unknown.bestRssi !== null
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Best RSSI:</span>
-                              <span class="value">${unknown.bestRssi} dBm</span>
-                          </div>
-                      `
-                    : nothing}
+                ${
+                    unknown.networkName !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Thread network:</span>
+                                  <span class="value">${unknown.networkName}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    unknown.extendedPanIdHex !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Extended PAN ID:</span>
+                                  <span class="value mono">${unknown.extendedPanIdHex}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    unknown.bestRssi !== null
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Best RSSI:</span>
+                                  <span class="value">${unknown.bestRssi} dBm</span>
+                              </div>
+                          `
+                        : nothing
+                }
             </div>
 
             ${this._renderExternalDeviceNeighbors(deviceId)}
@@ -624,62 +672,76 @@ export class NetworkDetails extends LitElement {
      */
     private _renderBorderRouterIdentityRows(br: BorderRouterEntry, includeExtAddr: boolean): TemplateResult {
         return html`
-            ${br.networkName
-                ? html`
-                      <div class="info-row">
-                          <span class="label">Network name:</span>
-                          <span class="value">${br.networkName}</span>
-                      </div>
-                  `
-                : nothing}
-            ${br.vendorName
-                ? html`
-                      <div class="info-row">
-                          <span class="label">Vendor:</span>
-                          <span class="value">${br.vendorName}</span>
-                      </div>
-                  `
-                : nothing}
-            ${br.modelName
-                ? html`
-                      <div class="info-row">
-                          <span class="label">Model:</span>
-                          <span class="value">${br.modelName}</span>
-                      </div>
-                  `
-                : nothing}
-            ${br.threadVersion
-                ? html`
-                      <div class="info-row">
-                          <span class="label">Thread version:</span>
-                          <span class="value">${br.threadVersion}</span>
-                      </div>
-                  `
-                : nothing}
-            ${br.swVersion
-                ? html`
-                      <div class="info-row">
-                          <span class="label">SW version:</span>
-                          <span class="value">${br.swVersion}</span>
-                      </div>
-                  `
-                : nothing}
-            ${br.recordVersion
-                ? html`
-                      <div class="info-row">
-                          <span class="label">Record version:</span>
-                          <span class="value">${br.recordVersion}</span>
-                      </div>
-                  `
-                : nothing}
-            ${includeExtAddr
-                ? html`
-                      <div class="info-row">
-                          <span class="label">Extended address:</span>
-                          <span class="value mono">${br.extAddressHex}</span>
-                      </div>
-                  `
-                : nothing}
+            ${
+                br.networkName
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">Network name:</span>
+                              <span class="value">${br.networkName}</span>
+                          </div>
+                      `
+                    : nothing
+            }
+            ${
+                br.vendorName
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">Vendor:</span>
+                              <span class="value">${br.vendorName}</span>
+                          </div>
+                      `
+                    : nothing
+            }
+            ${
+                br.modelName
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">Model:</span>
+                              <span class="value">${br.modelName}</span>
+                          </div>
+                      `
+                    : nothing
+            }
+            ${
+                br.threadVersion
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">Thread version:</span>
+                              <span class="value">${br.threadVersion}</span>
+                          </div>
+                      `
+                    : nothing
+            }
+            ${
+                br.swVersion
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">SW version:</span>
+                              <span class="value">${br.swVersion}</span>
+                          </div>
+                      `
+                    : nothing
+            }
+            ${
+                br.recordVersion
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">Record version:</span>
+                              <span class="value">${br.recordVersion}</span>
+                          </div>
+                      `
+                    : nothing
+            }
+            ${
+                includeExtAddr
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">Extended address:</span>
+                              <span class="value mono">${br.extAddressHex}</span>
+                          </div>
+                      `
+                    : nothing
+            }
         `;
     }
 
@@ -726,16 +788,18 @@ export class NetworkDetails extends LitElement {
                 <span class="label">ePSKc:</span>
                 <span class="value">${decoded.epskcSupported ? "supported" : "not supported"}</span>
             </div>
-            ${decoded.multiAilStateValue !== 0
-                ? html`
-                      <div class="info-row">
-                          <span class="label">Multi-AIL:</span>
-                          <span class="value">
-                              ${decoded.multiAilState ?? `reserved (${decoded.multiAilStateValue})`}
-                          </span>
-                      </div>
-                  `
-                : nothing}
+            ${
+                decoded.multiAilStateValue !== 0
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">Multi-AIL:</span>
+                              <span class="value">
+                                  ${decoded.multiAilState ?? `reserved (${decoded.multiAilStateValue})`}
+                              </span>
+                          </div>
+                      `
+                    : nothing
+            }
             <div class="info-row">
                 <span class="label">State bitmap (raw):</span>
                 <span class="value mono">${hex}</span>
@@ -758,47 +822,57 @@ export class NetworkDetails extends LitElement {
         if (!hasAny) return nothing;
 
         return html`
-            ${br.extendedPanIdHex
-                ? html`
-                      <div class="info-row">
-                          <span class="label">Extended PAN ID:</span>
-                          <span class="value mono">${br.extendedPanIdHex}</span>
-                      </div>
-                  `
-                : nothing}
-            ${br.partitionIdHex
-                ? html`
-                      <div class="info-row">
-                          <span class="label">Partition ID:</span>
-                          <span class="value mono">${br.partitionIdHex}</span>
-                      </div>
-                  `
-                : nothing}
-            ${br.activeTimestampHex
-                ? html`
-                      <div class="info-row">
-                          <span class="label">Active timestamp:</span>
-                          <span class="value mono">${br.activeTimestampHex}</span>
-                      </div>
-                  `
-                : nothing}
+            ${
+                br.extendedPanIdHex
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">Extended PAN ID:</span>
+                              <span class="value mono">${br.extendedPanIdHex}</span>
+                          </div>
+                      `
+                    : nothing
+            }
+            ${
+                br.partitionIdHex
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">Partition ID:</span>
+                              <span class="value mono">${br.partitionIdHex}</span>
+                          </div>
+                      `
+                    : nothing
+            }
+            ${
+                br.activeTimestampHex
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">Active timestamp:</span>
+                              <span class="value mono">${br.activeTimestampHex}</span>
+                          </div>
+                      `
+                    : nothing
+            }
             ${this._renderStateBitmap(br.stateBitmapHex)}
-            ${br.domainName
-                ? html`
-                      <div class="info-row">
-                          <span class="label">Domain:</span>
-                          <span class="value">${br.domainName}</span>
-                      </div>
-                  `
-                : nothing}
-            ${br.borderAgentIdHex
-                ? html`
-                      <div class="info-row">
-                          <span class="label">Border agent ID:</span>
-                          <span class="value mono">${br.borderAgentIdHex}</span>
-                      </div>
-                  `
-                : nothing}
+            ${
+                br.domainName
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">Domain:</span>
+                              <span class="value">${br.domainName}</span>
+                          </div>
+                      `
+                    : nothing
+            }
+            ${
+                br.borderAgentIdHex
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">Border agent ID:</span>
+                              <span class="value mono">${br.borderAgentIdHex}</span>
+                          </div>
+                      `
+                    : nothing
+            }
         `;
     }
 
@@ -815,14 +889,16 @@ export class NetworkDetails extends LitElement {
         if (!hasAny) return nothing;
 
         return html`
-            ${br.hostname
-                ? html`
-                      <div class="info-row">
-                          <span class="label">Hostname:</span>
-                          <span class="value mono">${br.hostname}</span>
-                      </div>
-                  `
-                : nothing}
+            ${
+                br.hostname
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">Hostname:</span>
+                              <span class="value mono">${br.hostname}</span>
+                          </div>
+                      `
+                    : nothing
+            }
             ${br.addresses.map(
                 addr => html`
                     <div class="info-row">
@@ -831,30 +907,36 @@ export class NetworkDetails extends LitElement {
                     </div>
                 `,
             )}
-            ${br.meshcopPort !== undefined
-                ? html`
-                      <div class="info-row">
-                          <span class="label">MeshCoP port:</span>
-                          <span class="value">${br.meshcopPort}</span>
-                      </div>
-                  `
-                : nothing}
-            ${br.trelPort !== undefined
-                ? html`
-                      <div class="info-row">
-                          <span class="label">TREL port:</span>
-                          <span class="value">${br.trelPort}</span>
-                      </div>
-                  `
-                : nothing}
-            ${br.sources.length > 0
-                ? html`
-                      <div class="info-row">
-                          <span class="label">Sources:</span>
-                          <span class="value">${br.sources.join(", ")}</span>
-                      </div>
-                  `
-                : nothing}
+            ${
+                br.meshcopPort !== undefined
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">MeshCoP port:</span>
+                              <span class="value">${br.meshcopPort}</span>
+                          </div>
+                      `
+                    : nothing
+            }
+            ${
+                br.trelPort !== undefined
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">TREL port:</span>
+                              <span class="value">${br.trelPort}</span>
+                          </div>
+                      `
+                    : nothing
+            }
+            ${
+                br.sources.length > 0
+                    ? html`
+                          <div class="info-row">
+                              <span class="label">Sources:</span>
+                              <span class="value">${br.sources.join(", ")}</span>
+                          </div>
+                      `
+                    : nothing
+            }
         `;
     }
 
@@ -930,70 +1012,84 @@ export class NetworkDetails extends LitElement {
             <md-divider></md-divider>
             <div class="section">
                 ${heading}${errorBanner}
-                ${batch.source !== "none"
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Source:</span>
-                              <span class="value">${batch.source}</span>
-                          </div>
-                      `
-                    : nothing}
+                ${
+                    batch.source !== "none"
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Source:</span>
+                                  <span class="value">${batch.source}</span>
+                              </div>
+                          `
+                        : nothing
+                }
                 <div class="info-row">
                     <span class="label">Updated:</span>
                     <span class="value">${collected}</span>
                 </div>
-                ${routerCount > 0
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Routers:</span>
-                              <span class="value">${routerCount}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${brNode?.leaderData !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Leader router ID:</span>
-                              <span class="value">${brNode.leaderData.leaderRouterId}</span>
-                          </div>
-                          <div class="info-row">
-                              <span class="label">Partition ID:</span>
-                              <span class="value mono">${brNode.leaderData.partitionId.toString(16)}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${childCount > 0
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Children:</span>
-                              <span class="value">${childCount}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${brNode?.vendorName !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Diagnostic vendor:</span>
-                              <span class="value">${brNode.vendorName}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${brNode?.vendorModel !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Diagnostic model:</span>
-                              <span class="value">${brNode.vendorModel}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${brNode?.threadStackVersion !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Stack version:</span>
-                              <span class="value">${brNode.threadStackVersion}</span>
-                          </div>
-                      `
-                    : nothing}
+                ${
+                    routerCount > 0
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Routers:</span>
+                                  <span class="value">${routerCount}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    brNode?.leaderData !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Leader router ID:</span>
+                                  <span class="value">${brNode.leaderData.leaderRouterId}</span>
+                              </div>
+                              <div class="info-row">
+                                  <span class="label">Partition ID:</span>
+                                  <span class="value mono">${brNode.leaderData.partitionId.toString(16)}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    childCount > 0
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Children:</span>
+                                  <span class="value">${childCount}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    brNode?.vendorName !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Diagnostic vendor:</span>
+                                  <span class="value">${brNode.vendorName}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    brNode?.vendorModel !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Diagnostic model:</span>
+                                  <span class="value">${brNode.vendorModel}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    brNode?.threadStackVersion !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Stack version:</span>
+                                  <span class="value">${brNode.threadStackVersion}</span>
+                              </div>
+                          `
+                        : nothing
+                }
             </div>
         `;
     }
@@ -1014,62 +1110,76 @@ export class NetworkDetails extends LitElement {
             <md-divider></md-divider>
             <div class="section">
                 <h4>Thread Diagnostics</h4>
-                ${diagNode.vendorName !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Diagnostic vendor:</span>
-                              <span class="value">${diagNode.vendorName}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${diagNode.vendorModel !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Diagnostic model:</span>
-                              <span class="value">${diagNode.vendorModel}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${diagNode.vendorSwVersion !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">SW version:</span>
-                              <span class="value">${diagNode.vendorSwVersion}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${diagNode.threadStackVersion !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Stack version:</span>
-                              <span class="value">${diagNode.threadStackVersion}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${ipv6Count > 0
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">IPv6 addresses:</span>
-                              <span class="value">${ipv6Count}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${macTx !== undefined && macRx !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">MAC tx/rx:</span>
-                              <span class="value">${macTx} / ${macRx}</span>
-                          </div>
-                      `
-                    : nothing}
-                ${diagNode.mleCounters?.parentChanges !== undefined
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Parent changes:</span>
-                              <span class="value">${diagNode.mleCounters.parentChanges}</span>
-                          </div>
-                      `
-                    : nothing}
+                ${
+                    diagNode.vendorName !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Diagnostic vendor:</span>
+                                  <span class="value">${diagNode.vendorName}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    diagNode.vendorModel !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Diagnostic model:</span>
+                                  <span class="value">${diagNode.vendorModel}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    diagNode.vendorSwVersion !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">SW version:</span>
+                                  <span class="value">${diagNode.vendorSwVersion}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    diagNode.threadStackVersion !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Stack version:</span>
+                                  <span class="value">${diagNode.threadStackVersion}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    ipv6Count > 0
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">IPv6 addresses:</span>
+                                  <span class="value">${ipv6Count}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    macTx !== undefined && macRx !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">MAC tx/rx:</span>
+                                  <span class="value">${macTx} / ${macRx}</span>
+                              </div>
+                          `
+                        : nothing
+                }
+                ${
+                    diagNode.mleCounters?.parentChanges !== undefined
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Parent changes:</span>
+                                  <span class="value">${diagNode.mleCounters.parentChanges}</span>
+                              </div>
+                          `
+                        : nothing
+                }
             </div>
         `;
     }
@@ -1087,34 +1197,40 @@ export class NetworkDetails extends LitElement {
             <div class="section">
                 <h4>Border Router</h4>
                 ${this._renderBorderRouterIdentityRows(br, true)}
-                ${br.bestRssi !== null
-                    ? html`
-                          <div class="info-row">
-                              <span class="label">Best RSSI:</span>
-                              <span class="value">${br.bestRssi} dBm</span>
-                          </div>
-                      `
-                    : nothing}
+                ${
+                    br.bestRssi !== null
+                        ? html`
+                              <div class="info-row">
+                                  <span class="label">Best RSSI:</span>
+                                  <span class="value">${br.bestRssi} dBm</span>
+                              </div>
+                          `
+                        : nothing
+                }
             </div>
 
-            ${networkRows !== nothing
-                ? html`
-                      <md-divider></md-divider>
-                      <div class="section">
-                          <h4>Thread Network</h4>
-                          ${networkRows}
-                      </div>
-                  `
-                : nothing}
-            ${addressRows !== nothing
-                ? html`
-                      <md-divider></md-divider>
-                      <div class="section">
-                          <h4>Addresses</h4>
-                          ${addressRows}
-                      </div>
-                  `
-                : nothing}
+            ${
+                networkRows !== nothing
+                    ? html`
+                          <md-divider></md-divider>
+                          <div class="section">
+                              <h4>Thread Network</h4>
+                              ${networkRows}
+                          </div>
+                      `
+                    : nothing
+            }
+            ${
+                addressRows !== nothing
+                    ? html`
+                          <md-divider></md-divider>
+                          <div class="section">
+                              <h4>Addresses</h4>
+                              ${addressRows}
+                          </div>
+                      `
+                    : nothing
+            }
             ${this._renderBorderRouterDiagnostics(br)} ${this._renderExternalDeviceNeighbors(deviceId)}
         `;
     }
@@ -1278,51 +1394,59 @@ export class NetworkDetails extends LitElement {
                     <span class="value">${ap.connectedNodes.length}</span>
                 </div>
             </div>
-            ${ap.connectedNodes.length > 0
-                ? html`
-                      <md-divider></md-divider>
-                      <div class="section">
-                          <h4>Connected Nodes</h4>
-                          <div class="connected-nodes-list">
-                              ${ap.connectedNodes
-                                  .toSorted((a, b) => {
-                                      const nodeA = this.nodes[a.toString()];
-                                      const nodeB = this.nodes[b.toString()];
-                                      const rssiA = nodeA ? (getWiFiDiagnostics(nodeA)?.rssi ?? -Infinity) : -Infinity;
-                                      const rssiB = nodeB ? (getWiFiDiagnostics(nodeB)?.rssi ?? -Infinity) : -Infinity;
-                                      return rssiB - rssiA;
-                                  })
-                                  .map(nodeId => {
-                                      const node = this.nodes[nodeId.toString()];
-                                      if (!node) return nothing;
-                                      const wifiDiag = getWiFiDiagnostics(node);
-                                      const signalColor = getSignalColorFromRssi(wifiDiag.rssi);
+            ${
+                ap.connectedNodes.length > 0
+                    ? html`
+                          <md-divider></md-divider>
+                          <div class="section">
+                              <h4>Connected Nodes</h4>
+                              <div class="connected-nodes-list">
+                                  ${ap.connectedNodes
+                                      .toSorted((a, b) => {
+                                          const nodeA = this.nodes[a.toString()];
+                                          const nodeB = this.nodes[b.toString()];
+                                          const rssiA = nodeA
+                                              ? (getWiFiDiagnostics(nodeA)?.rssi ?? -Infinity)
+                                              : -Infinity;
+                                          const rssiB = nodeB
+                                              ? (getWiFiDiagnostics(nodeB)?.rssi ?? -Infinity)
+                                              : -Infinity;
+                                          return rssiB - rssiA;
+                                      })
+                                      .map(nodeId => {
+                                          const node = this.nodes[nodeId.toString()];
+                                          if (!node) return nothing;
+                                          const wifiDiag = getWiFiDiagnostics(node);
+                                          const signalColor = getSignalColorFromRssi(wifiDiag.rssi);
 
-                                      return html`
-                                          <div
-                                              class="connected-node-item clickable"
-                                              role="button"
-                                              tabindex="0"
-                                              @click=${() => this._handleSelectNode(nodeId)}
-                                              @keydown=${(e: KeyboardEvent) => this._handleKeyDown(e, nodeId)}
-                                          >
-                                              <div class="node-name">
-                                                  Node ${nodeId}
-                                                  <span class="node-id-hex">${this._formatNodeIdHex(nodeId)}</span>:
-                                                  ${getDeviceName(node)}
+                                          return html`
+                                              <div
+                                                  class="connected-node-item clickable"
+                                                  role="button"
+                                                  tabindex="0"
+                                                  @click=${() => this._handleSelectNode(nodeId)}
+                                                  @keydown=${(e: KeyboardEvent) => this._handleKeyDown(e, nodeId)}
+                                              >
+                                                  <div class="node-name">
+                                                      Node ${nodeId}
+                                                      <span class="node-id-hex">${this._formatNodeIdHex(nodeId)}</span>:
+                                                      ${getDeviceName(node)}
+                                                  </div>
+                                                  ${
+                                                      wifiDiag.rssi !== null
+                                                          ? html`<div class="node-signal" style="color: ${signalColor}">
+                                                                ${wifiDiag.rssi} dBm
+                                                            </div>`
+                                                          : nothing
+                                                  }
                                               </div>
-                                              ${wifiDiag.rssi !== null
-                                                  ? html`<div class="node-signal" style="color: ${signalColor}">
-                                                        ${wifiDiag.rssi} dBm
-                                                    </div>`
-                                                  : nothing}
-                                          </div>
-                                      `;
-                                  })}
+                                          `;
+                                      })}
+                              </div>
                           </div>
-                      </div>
-                  `
-                : nothing}
+                      `
+                    : nothing
+            }
             <md-divider></md-divider>
             <div class="section">
                 <p class="hint-text">
@@ -1350,18 +1474,22 @@ export class NetworkDetails extends LitElement {
             <div class="section">
                 <h4>Also a Border Router</h4>
                 ${this._renderBorderRouterIdentityRows(br, false)}
-                ${networkRows !== nothing
-                    ? html`
-                          <div class="subsection-label">Thread Network</div>
-                          ${networkRows}
-                      `
-                    : nothing}
-                ${addressRows !== nothing
-                    ? html`
-                          <div class="subsection-label">Addresses</div>
-                          ${addressRows}
-                      `
-                    : nothing}
+                ${
+                    networkRows !== nothing
+                        ? html`
+                              <div class="subsection-label">Thread Network</div>
+                              ${networkRows}
+                          `
+                        : nothing
+                }
+                ${
+                    addressRows !== nothing
+                        ? html`
+                              <div class="subsection-label">Addresses</div>
+                              ${addressRows}
+                          `
+                        : nothing
+                }
             </div>
         `;
     }
@@ -1385,18 +1513,20 @@ export class NetworkDetails extends LitElement {
                     <div class="header">
                         <h3>External Device</h3>
                         <div class="header-actions">
-                            ${onlineSeenByNodes.length > 0
-                                ? html`
-                                      <button
-                                          class="action-button"
-                                          @click=${this._handleUpdateConnections}
-                                          aria-label="Update connection data"
-                                          title="Update connection data"
-                                      >
-                                          <ha-svg-icon .path=${mdiRefresh}></ha-svg-icon>
-                                      </button>
-                                  `
-                                : nothing}
+                            ${
+                                onlineSeenByNodes.length > 0
+                                    ? html`
+                                          <button
+                                              class="action-button"
+                                              @click=${this._handleUpdateConnections}
+                                              aria-label="Update connection data"
+                                              title="Update connection data"
+                                          >
+                                              <ha-svg-icon .path=${mdiRefresh}></ha-svg-icon>
+                                          </button>
+                                      `
+                                    : nothing
+                            }
                             <button class="close-button" @click=${this._handleClose} aria-label="Close details panel">
                                 <ha-svg-icon .path=${mdiClose}></ha-svg-icon>
                             </button>
@@ -1404,18 +1534,20 @@ export class NetworkDetails extends LitElement {
                     </div>
                     <div class="content">${this._renderUnknownDeviceInfo(this.selectedNodeId as string)}</div>
                 </div>
-                ${this._showUpdateDialog
-                    ? html`
-                          <update-connections-dialog
-                              .nodes=${this.nodes}
-                              selectedNodeType="unknown"
-                              .selectedNodeName=${this._getSelectedNodeName()}
-                              .selectedNodeId=${this.selectedNodeId}
-                              .onlineNeighborIds=${onlineSeenByNodes}
-                              @dialog-closed=${this._handleDialogClose}
-                          ></update-connections-dialog>
-                      `
-                    : nothing}
+                ${
+                    this._showUpdateDialog
+                        ? html`
+                              <update-connections-dialog
+                                  .nodes=${this.nodes}
+                                  selectedNodeType="unknown"
+                                  .selectedNodeName=${this._getSelectedNodeName()}
+                                  .selectedNodeId=${this.selectedNodeId}
+                                  .onlineNeighborIds=${onlineSeenByNodes}
+                                  @dialog-closed=${this._handleDialogClose}
+                              ></update-connections-dialog>
+                          `
+                        : nothing
+                }
             `;
         }
 
@@ -1432,18 +1564,20 @@ export class NetworkDetails extends LitElement {
                     <div class="header">
                         <h3>Border Router</h3>
                         <div class="header-actions">
-                            ${onlineSeenByNodes.length > 0
-                                ? html`
-                                      <button
-                                          class="action-button"
-                                          @click=${this._handleUpdateConnections}
-                                          aria-label="Update connection data"
-                                          title="Update connection data"
-                                      >
-                                          <ha-svg-icon .path=${mdiRefresh}></ha-svg-icon>
-                                      </button>
-                                  `
-                                : nothing}
+                            ${
+                                onlineSeenByNodes.length > 0
+                                    ? html`
+                                          <button
+                                              class="action-button"
+                                              @click=${this._handleUpdateConnections}
+                                              aria-label="Update connection data"
+                                              title="Update connection data"
+                                          >
+                                              <ha-svg-icon .path=${mdiRefresh}></ha-svg-icon>
+                                          </button>
+                                      `
+                                    : nothing
+                            }
                             <button class="close-button" @click=${this._handleClose} aria-label="Close details panel">
                                 <ha-svg-icon .path=${mdiClose}></ha-svg-icon>
                             </button>
@@ -1451,18 +1585,20 @@ export class NetworkDetails extends LitElement {
                     </div>
                     <div class="content">${this._renderBorderRouterInfo(borderRouterId)}</div>
                 </div>
-                ${this._showUpdateDialog
-                    ? html`
-                          <update-connections-dialog
-                              .nodes=${this.nodes}
-                              selectedNodeType="unknown"
-                              .selectedNodeName=${this._getSelectedNodeName()}
-                              .selectedNodeId=${this.selectedNodeId}
-                              .onlineNeighborIds=${onlineSeenByNodes}
-                              @dialog-closed=${this._handleDialogClose}
-                          ></update-connections-dialog>
-                      `
-                    : nothing}
+                ${
+                    this._showUpdateDialog
+                        ? html`
+                              <update-connections-dialog
+                                  .nodes=${this.nodes}
+                                  selectedNodeType="unknown"
+                                  .selectedNodeName=${this._getSelectedNodeName()}
+                                  .selectedNodeId=${this.selectedNodeId}
+                                  .onlineNeighborIds=${onlineSeenByNodes}
+                                  @dialog-closed=${this._handleDialogClose}
+                              ></update-connections-dialog>
+                          `
+                        : nothing
+                }
             `;
         }
 
@@ -1522,18 +1658,20 @@ export class NetworkDetails extends LitElement {
                         <span class="node-id-hex">${this._formatNodeIdHex(this.selectedNodeId)}</span>
                     </h3>
                     <div class="header-actions">
-                        ${canUpdate
-                            ? html`
-                                  <button
-                                      class="action-button"
-                                      @click=${this._handleUpdateConnections}
-                                      aria-label="Update connection data"
-                                      title="Update connection data"
-                                  >
-                                      <ha-svg-icon .path=${mdiRefresh}></ha-svg-icon>
-                                  </button>
-                              `
-                            : nothing}
+                        ${
+                            canUpdate
+                                ? html`
+                                      <button
+                                          class="action-button"
+                                          @click=${this._handleUpdateConnections}
+                                          aria-label="Update connection data"
+                                          title="Update connection data"
+                                      >
+                                          <ha-svg-icon .path=${mdiRefresh}></ha-svg-icon>
+                                      </button>
+                                  `
+                                : nothing
+                        }
                         <button class="close-button" @click=${this._handleClose} aria-label="Close details panel">
                             <ha-svg-icon .path=${mdiClose}></ha-svg-icon>
                         </button>
@@ -1546,18 +1684,20 @@ export class NetworkDetails extends LitElement {
                     <a href="#node/${this.selectedNodeId}" class="view-link">View node details</a>
                 </div>
             </div>
-            ${this._showUpdateDialog
-                ? html`
-                      <update-connections-dialog
-                          .nodes=${this.nodes}
-                          .selectedNodeType=${nodeType}
-                          .selectedNodeName=${this._getSelectedNodeName()}
-                          .selectedNodeId=${this.selectedNodeId}
-                          .onlineNeighborIds=${onlineNeighbors}
-                          @dialog-closed=${this._handleDialogClose}
-                      ></update-connections-dialog>
-                  `
-                : nothing}
+            ${
+                this._showUpdateDialog
+                    ? html`
+                          <update-connections-dialog
+                              .nodes=${this.nodes}
+                              .selectedNodeType=${nodeType}
+                              .selectedNodeName=${this._getSelectedNodeName()}
+                              .selectedNodeId=${this.selectedNodeId}
+                              .onlineNeighborIds=${onlineNeighbors}
+                              @dialog-closed=${this._handleDialogClose}
+                          ></update-connections-dialog>
+                      `
+                    : nothing
+            }
         `;
     }
 

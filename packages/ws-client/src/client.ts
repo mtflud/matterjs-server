@@ -22,6 +22,7 @@ import {
     MatterNodeEvent,
     MatterSoftwareVersion,
     NodePingResult,
+    ResponseOf,
     SuccessResultMessage,
     ThreadDiagnosticsBatch,
     WebRtcCallbackData,
@@ -34,6 +35,20 @@ type IncomingMessage = EventMessage | ErrorResultMessage | SuccessResultMessage;
 /** Converts node_id to string for use as object key (works for both number and bigint without precision loss) */
 function toNodeKey(nodeId: number | bigint): string {
     return String(nodeId);
+}
+
+/**
+ * HTTP URL taking the bytes of a reserved OTA upload, derived from the WebSocket URL: same origin
+ * and mount point, `/ws` swapped for `/ota-upload/<upload_id>`.
+ */
+export function otaUploadUrl(wsUrl: string, uploadId: string): string {
+    const url = new URL(wsUrl);
+    url.protocol = url.protocol === "wss:" ? "https:" : "http:";
+    const mountPoint = url.pathname.replace(/\/ws\/?$/, "").replace(/\/$/, "");
+    url.pathname = `${mountPoint}/ota-upload/${uploadId}`;
+    url.search = "";
+    url.hash = "";
+    return url.href;
 }
 
 /** Default timeout for WebSocket commands in milliseconds (5 minutes) */
@@ -350,7 +365,7 @@ export class MatterClient {
         attributePath: string,
         value: unknown,
         timeout?: number,
-    ): Promise<unknown> {
+    ): Promise<ResponseOf<"write_attribute">> {
         // Write an attribute(value) on a target node.
         return await this.sendCommand(
             "write_attribute",
@@ -379,6 +394,40 @@ export class MatterClient {
         // by the built-in OTA provider. The OTA provider will download the update and
         // notify the node about the new update.
         await this.sendCommand("update_node", 10, { node_id: nodeId, software_version: softwareVersion }, timeout);
+    }
+
+    /**
+     * Store a locally-uploaded .ota firmware file in the server's OTA image store.
+     *
+     * Two steps: the WebSocket session authorizes the upload and reserves a slot, then the bytes go
+     * over HTTP against the returned single-use id.
+     */
+    async uploadOtaFile(file: Blob, timeout?: number): Promise<MatterSoftwareVersion> {
+        // An oversized image is rejected by the server (413) rather than here: a reservation holds
+        // one of the server's few upload slots for a minute, and there is no way to hand it back.
+        const ticket = await this.sendCommand("initiate_ota_upload", 13, {}, timeout);
+
+        const response = await fetch(otaUploadUrl(this.url, ticket.upload_id), {
+            method: "POST",
+            body: file,
+            signal: timeout ? AbortSignal.timeout(timeout) : undefined,
+        });
+
+        // A proxy in front of the server can answer with HTML, so the status is the only thing that
+        // can be trusted to be there.
+        let body: MatterSoftwareVersion & { error?: string; message?: string };
+        try {
+            body = await response.json();
+        } catch {
+            if (!response.ok) {
+                throw new Error(`Firmware upload failed: HTTP ${response.status} ${response.statusText}`);
+            }
+            throw new Error("Firmware upload returned a response that is no JSON");
+        }
+        if (!response.ok) {
+            throw new Error(body.message ?? body.error ?? `HTTP ${response.status} ${response.statusText}`);
+        }
+        return body;
     }
 
     async setACLEntry(nodeId: number | bigint, entry: AccessControlEntry[], timeout?: number) {

@@ -4,18 +4,24 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Final, Literal, Self, cast
 import uuid
 
 from chip.clusters import Objects as Clusters
 from chip.clusters.Types import NullValue
-from matter_server.common.errors import NodeNotExists, exception_from_error_code
+from matter_server.common.errors import (
+    MatterError,
+    NodeNotExists,
+    exception_from_error_code,
+)
 from matter_server.common.helpers.util import (
     convert_ip_address,
     convert_mac_address,
     create_attribute_path_from_attribute,
     dataclass_from_dict,
     dataclass_to_dict,
+    dataclass_to_tag_dict,
 )
 from matter_server.common.models import (
     APICommand,
@@ -30,7 +36,9 @@ from matter_server.common.models import (
     MatterNodeEvent,
     MatterSoftwareVersion,
     MessageType,
+    NetworkTopology,
     NodePingResult,
+    OtaUploadTicket,
     ResultMessageBase,
     ServerDiagnostics,
     ServerInfoMessage,
@@ -38,7 +46,12 @@ from matter_server.common.models import (
 )
 
 from .connection import MatterClientConnection
-from .exceptions import ConnectionClosed, InvalidState, ServerVersionTooOld
+from .exceptions import (
+    ConnectionClosed,
+    InvalidMessage,
+    InvalidState,
+    ServerVersionTooOld,
+)
 from .models.node import (
     MatterFabricData,
     MatterNode,
@@ -49,6 +62,7 @@ from .models.node import (
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from os import PathLike
     from types import TracebackType
 
     from aiohttp import ClientSession
@@ -307,6 +321,26 @@ class MatterClient:
         Requires schema 12.
         """
         await self.send_command(APICommand.RESYNC_ICD, require_schema=12, node_id=node_id)
+
+    async def get_network_topology(self, refresh: bool = False) -> NetworkTopology:
+        """Return the derived network topology graph (Thread mesh + Wi-Fi).
+
+        Issuing this command also subscribes the connection to
+        EventType.NETWORK_TOPOLOGY_UPDATED pushes. With refresh=True the server
+        re-reads the Thread/Wi-Fi diagnostics from every online node before
+        building the snapshot (slower - seconds); otherwise it builds from the
+        current attribute cache.
+
+        refresh=True costs real radio traffic on every online node, so it is a
+        user-initiated action - never poll it. The push event is the intended
+        source for keeping a graph current.
+
+        Requires schema 13 (OHF Matter Server).
+        """
+        data = await self.send_command(
+            APICommand.GET_NETWORK_TOPOLOGY, require_schema=13, refresh=refresh
+        )
+        return dataclass_from_dict(NetworkTopology, data)
 
     async def open_commissioning_window(
         self,
@@ -602,7 +636,7 @@ class MatterClient:
             require_schema=4,
             node_id=node_id,
             attribute_path=attribute_path,
-            value=value,
+            value=dataclass_to_tag_dict(value),
         )
 
     async def remove_node(self, node_id: int) -> None:
@@ -640,6 +674,45 @@ class MatterClient:
             software_version=software_version,
             require_schema=10,
         )
+
+    async def upload_ota_file(
+        self, image: bytes | bytearray | str | PathLike[str]
+    ) -> MatterSoftwareVersion:
+        """Store a local .ota firmware image in the server's OTA image store.
+
+        `image` is either the raw image bytes or a path to read them from. The image is
+        stored by the vendor ID / product ID / software version in its header, not against
+        a particular node: check_node_update surfaces it for any node that matches.
+
+        Two steps: the WebSocket session authorizes the upload and reserves one of the
+        server's limited slots, then the bytes go over HTTP against the returned single-use
+        id, which only this client may spend. An oversized image is rejected by the server
+        rather than here: a reservation holds a slot for a minute and cannot be handed back.
+
+        Requires schema 13 (OHF Matter Server).
+        """
+        if isinstance(image, bytes | bytearray):
+            data = bytes(image)
+        else:
+            data = await asyncio.to_thread(Path(image).read_bytes)
+
+        ticket = dataclass_from_dict(
+            OtaUploadTicket,
+            await self.send_command(APICommand.INITIATE_OTA_UPLOAD, require_schema=13),
+        )
+        status, body = await self.connection.post_ota_upload(ticket.upload_id, data)
+        if status != 200:
+            error_code = body.get("error_code") if body else None
+            message = (body.get("message") or body.get("error") if body else None) or (
+                f"Firmware upload failed with HTTP {status}"
+            )
+            if isinstance(error_code, int):
+                raise exception_from_error_code(error_code)(message)
+            raise MatterError(message)
+        if body is None:
+            raise InvalidMessage("Firmware upload returned a response that is no JSON")
+
+        return dataclass_from_dict(MatterSoftwareVersion, body)
 
     async def send_webrtc_provider_command(
         self,
@@ -868,6 +941,10 @@ class MatterClient:
                 data=node_event,
                 node_id=node_event.node_id,
             )
+            return
+        if msg.event == EventType.NETWORK_TOPOLOGY_UPDATED:
+            topology = dataclass_from_dict(NetworkTopology, msg.data)
+            self._signal_event(EventType.NETWORK_TOPOLOGY_UPDATED, data=topology)
             return
         # An event type unknown to this (older) client is passed through by parse_value as a raw
         # string; forwarding it would crash on `event.value` in _signal_event. Drop it instead so a

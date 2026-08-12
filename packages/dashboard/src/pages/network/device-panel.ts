@@ -110,24 +110,26 @@ export class DevicePanel extends LitElement {
                         class="expand-icon"
                     ></ha-svg-icon>
                 </div>
-                ${this._isExpanded
-                    ? html`
-                          <md-list class="device-list">
-                              ${this.nodeIds.map(nodeId => {
-                                  const node = this.nodes[nodeId.toString()];
-                                  if (!node) return nothing;
+                ${
+                    this._isExpanded
+                        ? html`
+                              <md-list class="device-list">
+                                  ${this.nodeIds.map(nodeId => {
+                                      const node = this.nodes[nodeId.toString()];
+                                      if (!node) return nothing;
 
-                                  return html`
-                                      <md-list-item type="button" @click=${() => this._handleNodeClick(nodeId)}>
-                                          <div slot="headline">Node ${nodeId}</div>
-                                          <div slot="supporting-text">${getDeviceName(node)}</div>
-                                          <ha-svg-icon slot="end" .path=${mdiChevronRight}></ha-svg-icon>
-                                      </md-list-item>
-                                  `;
-                              })}
-                          </md-list>
-                      `
-                    : nothing}
+                                      return html`
+                                          <md-list-item type="button" @click=${() => this._handleNodeClick(nodeId)}>
+                                              <div slot="headline">Node ${nodeId}</div>
+                                              <div slot="supporting-text">${getDeviceName(node)}</div>
+                                              <ha-svg-icon slot="end" .path=${mdiChevronRight}></ha-svg-icon>
+                                          </md-list-item>
+                                      `;
+                                  })}
+                              </md-list>
+                          `
+                        : nothing
+                }
             </div>
         `;
     }

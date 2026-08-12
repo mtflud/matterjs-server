@@ -159,47 +159,55 @@ export class NodeBindingDialog extends LitElement {
                 <md-select-option value=${ALL_CLUSTERS}>
                     <div slot="headline">All clusters (any eligible)</div>
                 </md-select-option>
-                ${split && split.bindable.length
-                    ? html`<md-select-option disabled><div slot="headline">— Bindable —</div></md-select-option>
-                          ${split.bindable.map(
-                              c =>
-                                  html`<md-select-option value=${String(c)}
-                                      ><div slot="headline">${this._clusterLabel(c)}</div></md-select-option
-                                  >`,
-                          )}`
-                    : nothing}
-                ${split && split.otherTarget.length
-                    ? html`<md-select-option disabled
-                              ><div slot="headline">— Other target clusters (⚠) —</div></md-select-option
-                          >
-                          ${split.otherTarget.map(
-                              c =>
-                                  html`<md-select-option value=${String(c)}
-                                      ><div slot="headline">${this._clusterLabel(c)}</div></md-select-option
-                                  >`,
-                          )}`
-                    : nothing}
+                ${
+                    split && split.bindable.length
+                        ? html`<md-select-option disabled><div slot="headline">— Bindable —</div></md-select-option>
+                              ${split.bindable.map(
+                                  c =>
+                                      html`<md-select-option value=${String(c)}
+                                          ><div slot="headline">${this._clusterLabel(c)}</div></md-select-option
+                                      >`,
+                              )}`
+                        : nothing
+                }
+                ${
+                    split && split.otherTarget.length
+                        ? html`<md-select-option disabled
+                                  ><div slot="headline">— Other target clusters (⚠) —</div></md-select-option
+                              >
+                              ${split.otherTarget.map(
+                                  c =>
+                                      html`<md-select-option value=${String(c)}
+                                          ><div slot="headline">${this._clusterLabel(c)}</div></md-select-option
+                                      >`,
+                              )}`
+                        : nothing
+                }
                 <md-select-option value=${CUSTOM_CLUSTER}
                     ><div slot="headline">Custom cluster id…</div></md-select-option
                 >
             </md-outlined-select>
-            ${this._clusterSelection === CUSTOM_CLUSTER
-                ? html`<md-outlined-text-field
-                      label="cluster id"
-                      type="number"
-                      min="0"
-                      max="32767"
-                      .value=${this._customClusterInput}
-                      ?disabled=${this._busy}
-                      @input=${(e: Event) => (this._customClusterInput = (e.target as HTMLInputElement).value)}
-                  ></md-outlined-text-field>`
-                : nothing}
-            ${nonBindable
-                ? html`<div class="warn">
-                      ⚠ This cluster is not a client cluster on the source endpoint. The binding may not function — it
-                      will be added anyway on your request.
-                  </div>`
-                : nothing}
+            ${
+                this._clusterSelection === CUSTOM_CLUSTER
+                    ? html`<md-outlined-text-field
+                          label="cluster id"
+                          type="number"
+                          min="0"
+                          max="32767"
+                          .value=${this._customClusterInput}
+                          ?disabled=${this._busy}
+                          @input=${(e: Event) => (this._customClusterInput = (e.target as HTMLInputElement).value)}
+                      ></md-outlined-text-field>`
+                    : nothing
+            }
+            ${
+                nonBindable
+                    ? html`<div class="warn">
+                          ⚠ This cluster is not a client cluster on the source endpoint. The binding may not function —
+                          it will be added anyway on your request.
+                      </div>`
+                    : nothing
+            }
         `;
     }
 
@@ -242,35 +250,39 @@ export class NodeBindingDialog extends LitElement {
                             }}
                         ></md-outlined-text-field>
 
-                        ${target
-                            ? html`<md-outlined-select
-                                  label="Target endpoint"
-                                  ?disabled=${this._busy}
-                                  .value=${this._endpointInput}
-                                  @change=${(e: Event) => {
-                                      this._endpointInput = (e.target as HTMLSelectElement).value;
-                                      this._clusterSelection = ALL_CLUSTERS;
-                                  }}
-                              >
-                                  ${endpoints.map(ep => {
-                                      const dt = getEndpointDeviceTypes(target, ep)[0];
-                                      return html`<md-select-option value=${String(ep)}>
-                                          <div slot="headline">EP ${ep}${dt ? ` · ${dt.label}` : ""}</div>
-                                      </md-select-option>`;
-                                  })}
-                              </md-outlined-select>`
-                            : html`<md-outlined-text-field
-                                  label="Target endpoint"
-                                  type="number"
-                                  min="0"
-                                  max="65534"
-                                  supporting-text=${this._nodeIdInput.trim() === ""
-                                      ? "enter a node id first"
-                                      : "unknown node — enter endpoint manually"}
-                                  ?disabled=${this._busy || this._nodeIdInput.trim() === ""}
-                                  .value=${this._endpointInput}
-                                  @input=${(e: Event) => (this._endpointInput = (e.target as HTMLInputElement).value)}
-                              ></md-outlined-text-field>`}
+                        ${
+                            target
+                                ? html`<md-outlined-select
+                                      label="Target endpoint"
+                                      ?disabled=${this._busy}
+                                      .value=${this._endpointInput}
+                                      @change=${(e: Event) => {
+                                          this._endpointInput = (e.target as HTMLSelectElement).value;
+                                          this._clusterSelection = ALL_CLUSTERS;
+                                      }}
+                                  >
+                                      ${endpoints.map(ep => {
+                                          const dt = getEndpointDeviceTypes(target, ep)[0];
+                                          return html`<md-select-option value=${String(ep)}>
+                                              <div slot="headline">EP ${ep}${dt ? ` · ${dt.label}` : ""}</div>
+                                          </md-select-option>`;
+                                      })}
+                                  </md-outlined-select>`
+                                : html`<md-outlined-text-field
+                                      label="Target endpoint"
+                                      type="number"
+                                      min="0"
+                                      max="65534"
+                                      supporting-text=${
+                                          this._nodeIdInput.trim() === ""
+                                              ? "enter a node id first"
+                                              : "unknown node — enter endpoint manually"
+                                      }
+                                      ?disabled=${this._busy || this._nodeIdInput.trim() === ""}
+                                      .value=${this._endpointInput}
+                                      @input=${(e: Event) => (this._endpointInput = (e.target as HTMLInputElement).value)}
+                                  ></md-outlined-text-field>`
+                        }
                         ${this._renderClusterField(target, endpoint)}
                     </div>
                 </div>

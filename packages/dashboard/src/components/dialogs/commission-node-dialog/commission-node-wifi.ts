@@ -145,26 +145,28 @@ export class CommissionNodeWifi extends LitElement {
                     Edit in Settings
                 </button>
             </div>
-            ${showPicker
-                ? html`<md-outlined-select
-                          label="WiFi network"
-                          .disabled=${this._loading}
-                          .value=${this._selectedId}
-                          @change=${(e: Event) => {
-                              this._selectedId = (e.target as HTMLSelectElement).value;
-                          }}
-                      >
-                          ${selectable.map(
-                              entry => html`
-                                  <md-select-option value=${entry.id}>
-                                      <div slot="headline">${entry.ssid || entry.id}</div>
-                                  </md-select-option>
-                              `,
-                          )}
-                      </md-outlined-select>
-                      <br />
-                      <br />`
-                : nothing}
+            ${
+                showPicker
+                    ? html`<md-outlined-select
+                              label="WiFi network"
+                              .disabled=${this._loading}
+                              .value=${this._selectedId}
+                              @change=${(e: Event) => {
+                                  this._selectedId = (e.target as HTMLSelectElement).value;
+                              }}
+                          >
+                              ${selectable.map(
+                                  entry => html`
+                                      <md-select-option value=${entry.id}>
+                                          <div slot="headline">${entry.ssid || entry.id}</div>
+                                      </md-select-option>
+                                  `,
+                              )}
+                          </md-outlined-select>
+                          <br />
+                          <br />`
+                    : nothing
+            }
             <md-outlined-text-field label="Pairing code" .disabled="${this._loading}"> </md-outlined-text-field>
             <br />
             <br />

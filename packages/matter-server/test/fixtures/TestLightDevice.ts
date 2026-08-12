@@ -11,6 +11,7 @@
  */
 
 import { Environment, Seconds, ServerNode } from "@matter/main";
+import { UserLabelServer } from "@matter/main/behaviors/user-label";
 import { OnOffLightDevice } from "@matter/main/devices/on-off-light";
 import { VendorId } from "@matter/main/types";
 import { DEVICE_DISCRIMINATOR, DEVICE_PASSCODE, DEVICE_PORT, MANUAL_PAIRING_CODE } from "../helpers/ProcessHelpers.js";
@@ -65,9 +66,12 @@ const node = await ServerNode.create({
     },
 });
 
-// Add the OnOffLight endpoint
-await node.add(OnOffLightDevice, {
+// Add the OnOffLight endpoint; UserLabel provides a writable list-of-struct attribute for write tests
+await node.add(OnOffLightDevice.with(UserLabelServer), {
     id: "light",
+    userLabel: {
+        labelList: [{ label: "room", value: "bedroom" }],
+    },
 });
 
 console.log("Test Light Device starting...");

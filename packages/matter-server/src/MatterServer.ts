@@ -6,7 +6,8 @@
 // Must be first: applies storage-driver process.env defaults before any matter.js
 // import (which loads NodeJsEnvironment and locks in baseline variables).
 import "./pre-init.js";
-// Register the custom clusters
+// Register the custom clusters; must stay above the matter.js consuming imports below because extensions of standard
+// clusters fail once a cluster model is finalized
 import "@matter-server/custom-clusters";
 // Standard imports
 import { BleProxyHandler, ProxyBle } from "@matter-server/ble-proxy";
@@ -24,11 +25,13 @@ import {
     WebSocketControllerHandler,
 } from "@matter-server/ws-controller";
 import { Ble } from "@matter/main/protocol";
+import { join } from "node:path";
 import { getCliOptions, getOriginalArgv, type LogLevel as CliLogLevel } from "./cli.js";
 import { LegacyDataWriter, loadLegacyData, type LegacyData } from "./converter/index.js";
 import { createFileLogger } from "./file-logger.js";
 import { initializeOta } from "./ota.js";
 import { HealthHandler } from "./server/HealthHandler.js";
+import { OtaUploadHandler } from "./server/OtaUploadHandler.js";
 import { StaticFileHandler } from "./server/StaticFileHandler.js";
 import { WebServer } from "./server/WebServer.js";
 import { MATTER_SERVER_VERSION } from "./version.js";
@@ -191,11 +194,18 @@ async function start() {
             subscriptionWatchdog: cliOptions.subscriptionWatchdog,
             maxSubscriptionIntervalSeconds: cliOptions.maxSubscriptionInterval,
             disableThreadDiagnostics: cliOptions.disableThreadDiagnostics,
+            otaUpload: {
+                // Staged next to the images it feeds, so importing one never crosses a filesystem.
+                tempDir: join(cliOptions.otaProviderDir ?? cliOptions.storagePath, "ota-uploads"),
+                maxInFlight: cliOptions.otaUploadMaxInFlight,
+                maxSizeBytes: cliOptions.otaUploadMaxSizeMb * 1024 * 1024,
+            },
         },
         legacyServerData,
     );
 
     if (!cliOptions.disableOta) {
+        await controller.otaUploads.cleanupOrphans();
         controller.commandHandler.events.started.once(async () => await initializeOta(controller, cliOptions));
     }
 
@@ -228,11 +238,16 @@ async function start() {
 
     const wsHandler = new WebSocketControllerHandler(controller, config, MATTER_SERVER_VERSION);
     const handlers: WebServerHandler[] = [new HealthHandler(wsHandler), wsHandler];
+    const reservedPaths = new Array<string>();
+    if (!cliOptions.disableOta) {
+        handlers.push(new OtaUploadHandler(controller.otaUploads));
+        reservedPaths.push("/ota-upload");
+    }
     if (bleProxyHandler) {
         handlers.push(bleProxyHandler);
     }
     if (!cliOptions.disableDashboard) {
-        handlers.push(new StaticFileHandler(cliOptions.productionMode));
+        handlers.push(new StaticFileHandler(cliOptions.productionMode, reservedPaths));
     } else {
         logger.info("Dashboard disabled via CLI flag");
     }

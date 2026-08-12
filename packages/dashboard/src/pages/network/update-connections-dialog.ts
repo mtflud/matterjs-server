@@ -280,60 +280,68 @@ export class UpdateConnectionsDialog extends LitElement {
         const plural = neighborCount !== 1 ? "s" : "";
 
         return html`
-            ${sleepy
-                ? html`
-                      <p>
-                          "<strong>${this.selectedNodeName}</strong>" is a sleepy device (Matter LIT). It answers only
-                          when it next wakes, so its own network data arrives later.
-                      </p>
-                  `
-                : html`<p>Refresh network information for "<strong>${this.selectedNodeName}</strong>".</p>`}
-            ${neighborCount > 0
-                ? html`
-                      <label class="checkbox-row">
-                          <md-checkbox
-                              ?checked=${this._includeNeighbors}
-                              @change=${this._handleCheckboxChange}
-                              ?disabled=${this._isUpdating}
-                          ></md-checkbox>
-                          <span
-                              >${sleepy ? "Refresh" : "Include"} ${neighborCount} connected online
-                              neighbor${plural}${sleepy ? " for current link data" : ""}</span
-                          >
-                      </label>
-                  `
-                : sleepy
-                  ? html`<p class="note">No online neighbor can report its current link data either.</p>`
-                  : nothing}
+            ${
+                sleepy
+                    ? html`
+                          <p>
+                              "<strong>${this.selectedNodeName}</strong>" is a sleepy device (Matter LIT). It answers
+                              only when it next wakes, so its own network data arrives later.
+                          </p>
+                      `
+                    : html`<p>Refresh network information for "<strong>${this.selectedNodeName}</strong>".</p>`
+            }
+            ${
+                neighborCount > 0
+                    ? html`
+                          <label class="checkbox-row">
+                              <md-checkbox
+                                  ?checked=${this._includeNeighbors}
+                                  @change=${this._handleCheckboxChange}
+                                  ?disabled=${this._isUpdating}
+                              ></md-checkbox>
+                              <span
+                                  >${sleepy ? "Refresh" : "Include"} ${neighborCount} connected online
+                                  neighbor${plural}${sleepy ? " for current link data" : ""}</span
+                              >
+                          </label>
+                      `
+                    : sleepy
+                      ? html`<p class="note">No online neighbor can report its current link data either.</p>`
+                      : nothing
+            }
         `;
     }
 
     private _renderOfflineContent(): unknown {
         return html`
             <p>"<strong>${this.selectedNodeName}</strong>" appears to be offline.</p>
-            ${this.onlineNeighborIds.length > 0
-                ? html`
-                      <p>
-                          Update network data from its ${this.onlineNeighborIds.length} online
-                          neighbor${this.onlineNeighborIds.length !== 1 ? "s" : ""} to refresh connection info.
-                      </p>
-                  `
-                : html` <p>No online neighbors available to update.</p> `}
+            ${
+                this.onlineNeighborIds.length > 0
+                    ? html`
+                          <p>
+                              Update network data from its ${this.onlineNeighborIds.length} online
+                              neighbor${this.onlineNeighborIds.length !== 1 ? "s" : ""} to refresh connection info.
+                          </p>
+                      `
+                    : html` <p>No online neighbors available to update.</p> `
+            }
         `;
     }
 
     private _renderUnknownContent(): unknown {
         return html`
             <p>This device is not commissioned to this fabric and cannot be queried directly.</p>
-            ${this.onlineNeighborIds.length > 0
-                ? html`
-                      <p>
-                          Update network data from ${this.onlineNeighborIds.length}
-                          node${this.onlineNeighborIds.length !== 1 ? "s" : ""} that
-                          see${this.onlineNeighborIds.length === 1 ? "s" : ""} this device to refresh info.
-                      </p>
-                  `
-                : html` <p>No online nodes available that see this device.</p> `}
+            ${
+                this.onlineNeighborIds.length > 0
+                    ? html`
+                          <p>
+                              Update network data from ${this.onlineNeighborIds.length}
+                              node${this.onlineNeighborIds.length !== 1 ? "s" : ""} that
+                              see${this.onlineNeighborIds.length === 1 ? "s" : ""} this device to refresh info.
+                          </p>
+                      `
+                    : html` <p>No online nodes available that see this device.</p> `
+            }
         `;
     }
 
@@ -364,11 +372,13 @@ export class UpdateConnectionsDialog extends LitElement {
             <md-dialog @closed=${this._handleDialogClosed}>
                 <div slot="headline">Update Connection Data</div>
                 <div slot="content">
-                    ${this.selectedNodeType === "online"
-                        ? this._renderOnlineContent()
-                        : this.selectedNodeType === "offline"
-                          ? this._renderOfflineContent()
-                          : this._renderUnknownContent()}
+                    ${
+                        this.selectedNodeType === "online"
+                            ? this._renderOnlineContent()
+                            : this.selectedNodeType === "offline"
+                              ? this._renderOfflineContent()
+                              : this._renderUnknownContent()
+                    }
                     ${this._renderLongIdleTimeNote()}
                 </div>
                 <div slot="actions">
@@ -377,11 +387,13 @@ export class UpdateConnectionsDialog extends LitElement {
                         @click=${this._executeUpdate}
                         ?disabled=${this._isUpdating || this._updateCount === 0}
                     >
-                        ${this._isUpdating
-                            ? html`<span class="updating-content"
-                                  >${svg`<svg class="spinner" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="${mdiLoading}"/></svg>`}Updating...</span
-                              >`
-                            : buttonText}
+                        ${
+                            this._isUpdating
+                                ? html`<span class="updating-content"
+                                      >${svg`<svg class="spinner" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="${mdiLoading}"/></svg>`}Updating...</span
+                                  >`
+                                : buttonText
+                        }
                     </md-filled-button>
                 </div>
             </md-dialog>
